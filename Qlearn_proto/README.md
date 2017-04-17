@@ -1,3 +1,6 @@
-# Navio python drivers
+This is school capstone project 
 
-Drivers for devices on Navio 2 board
+this project is based on emlid's navio driver 
+
+
+https://github.com/emlid/Navio2
