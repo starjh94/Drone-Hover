@@ -18,7 +18,7 @@ class servo:
 	with navio.pwm.PWM(1) as pwm_1:
 		pwm_1.set_period(50)
 		pwm_1.set_duty_cycle(pwm_v)
-    def servo_2(self):
+    def servo_2(self,pwm_v):
         with navio.pwm.PWM(2) as pwm_2:
                 pwm_2.set_period(50)
                 pwm_2.set_duty_cycle(pwm_v)
