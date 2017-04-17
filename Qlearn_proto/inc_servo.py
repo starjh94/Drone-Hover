@@ -2,10 +2,11 @@ import Servo
 import degree
 import threading
 
-
+## Initialize
 pwm_1 = 1.1
 pwm_2 = 1.22
 
+## Using threading Timer
 def every5sec() :
     b = degree.acc()
     
