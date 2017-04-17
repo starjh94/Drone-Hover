@@ -26,7 +26,7 @@ while(True):
 		start_time = 0
 		start_time = 0
 		print pwm_1
-	pitch_v = b.pitch
+	pitch_v = b.pitch()
 #	print b.pitch()
 	
 	
