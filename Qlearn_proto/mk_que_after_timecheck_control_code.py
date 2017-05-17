@@ -70,12 +70,12 @@ def main() :
 			count += 1
 			que.pop(0)
 		if(pitch_aver <=180 and pitch_aver >0):
-			a.servo_1(1.0)
-			a.servo_2(pwm_2)
-			print "180down"
-		elif(pitch_aver >180 and pitch_aver < 360):
 			a.servo_1(pwm_1)
 			a.servo_2(1.0)
+			print "180down"
+		elif(pitch_aver >180 and pitch_aver < 360):
+			a.servo_1(1.0)
+			a.servo_2(pwm_2)
 			print "180up"
 		else:
 		        a.servo_1(pwm_1)
