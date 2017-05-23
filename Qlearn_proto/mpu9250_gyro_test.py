@@ -342,7 +342,7 @@ class MPU9250:
             time.sleep(0.01) # I2C must slow down the write speed, otherwise it won't work
 
         self.set_acc_scale(self.__BITS_FS_16G)
-        self.set_gyro_scale(self.__BITS_FS_250DPS)
+        self.set_gyro_scale(self.__BITS_FS_2000DPS)
 
         self.calib_mag()
 
@@ -545,8 +545,9 @@ class MPU9250:
         for i in range(4, 7):
              data = self.byte_to_float(response[i*2:i*2+2])
              b = self.gyroscope_data[i-4] =(self.PI/180)*data/self.gyro_divider
-             abc.append(b)
-            #print abc[0],abc[1],abc[2]
+             #b = self.gyroscope_data[i-4] = data/self.gyro_divider
+	     abc.append(b)
+             #print abc[0],abc[1],abc[2]
         if(abc[0] > 16383 or abc[0] < -16383):
 	     print "over the range" 
 	#print abc[0] , abc[1] ,abc[2]

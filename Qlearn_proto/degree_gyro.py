@@ -2,7 +2,7 @@ import spidev
 import time
 import argparse
 import sys
-import navio.mpu9250
+import mpu9250_gyro_test
 import navio.util
 import math
 class acc:
@@ -27,6 +27,7 @@ class acc:
 	def gyro_pitch(self, loop_time, previous_pitch):
 		m9a, m9g, m9m = acc.imu.getMotion9()
 		pitch_gyro = previous_pitch + m9g[1] * loop_time
+		#pitch_gyro = m9g[1]
 		return pitch_gyro 
 
     	def roll(self):

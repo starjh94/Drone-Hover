@@ -41,7 +41,9 @@ def main() :
     	
 	que = []
 	timecheck_list = []    	
-	gyro_pitch_data = 0		
+	gyro_pitch_degree = b.pitch()		
+	acc_gyro_pitch = b.pitch()
+	#gyro_pitch_data = 0
 
 #	every5sec()
 	every1sec()
@@ -62,12 +64,15 @@ def main() :
 		#count += 1		
 
 		"""
-		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, b.pitch())
+		acc_pitch_degree = b.pitch()
+		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
         	f.write(data)
 		"""
-		print "gyro_pitch_data = ", gyro_pitch_data
-		gyro_pitch_data = b.gyro_pitch(loop_time, gyro_pitch_data)
-		print "%s vs %s" % (b.pitch(), gyro_pitch_data)
+		acc_pitch_degree = b.pitch()
+
+		gyro_pitch_degree = b.gyro_pitch(loop_time, gyro_pitch_degree)
+		acc_gyro_pitch = (0.93 * gyro_pitch_degree) + (0.07 * acc_pitch_degree) 
+		print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
 		
 		"""
 		que.append(b.pitch())
@@ -91,6 +96,8 @@ def main() :
                         a.servo_2(pwm_2)
 			print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, pitch_aver, count)
 		"""
+
+		time.sleep(0.05)
 
 if __name__ == '__main__':
     main()
