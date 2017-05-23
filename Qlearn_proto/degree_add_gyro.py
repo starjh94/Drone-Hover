@@ -15,14 +15,16 @@ class acc:
     def pitch(self):
 	pitch_v = 0
         m9a, m9g, m9m = acc.imu.getMotion9()
-        acc_v = math.atan2(m9a[0], m9a[2]) * 180 / math.pi
+	hee = acc.imu.read_gyro()
+	acc_v = math.atan2(m9a[0], m9a[2]) * 180 / math.pi
         #pitch_v = (pitch_v + 360) % 360
 	#gy_x = m9g[0]
 	gy_y = m9g[1]
-	dgy_x = gy_y /131.
-	pitch_v = (0.95 * (pitch_v + (dgy_x * 1))) + (0.05 * acc_v)
-	print dgy_x
+	dgy_x = gy_y * 180 /math.pi
+	pitch_v = (0.95 * (pitch_v + (dgy_x * 0.01))) + (0.05 * acc_v)
 	return pitch_v
+
+
 
 
 

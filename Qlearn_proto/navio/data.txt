@@ -1,0 +1,4 @@
+1 sensor data / sec 
+179 sensor data / sec 
+162 sensor data / sec 
+1 sensor data / sec 

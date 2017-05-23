@@ -13,13 +13,17 @@ class acc:
     imu.initialize()
 
     def pitch(self):
-
+	pitch_v = 0
         m9a, m9g, m9m = acc.imu.getMotion9()
-        pitch_v = math.atan2(m9a[0], m9a[2]) * 180 / math.pi
-        print "pitch_v", pitch_v
-	pitch_v = (pitch_v + 360) % 360
-	
+	t = acc.imu.read_gyro() 
+	acc_v = math.atan2(m9a[0], m9a[2]) * 180 / math.pi
+        t1 =m9g[0] * 180/math.pi
+	print "kkk=",t1
+	t1 = t1 * 0.98 + acc_v * 0.02
+	print "Aaaa",t1
 	return pitch_v
+
+
 
 
 
