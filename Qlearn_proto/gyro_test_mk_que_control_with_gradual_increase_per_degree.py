@@ -32,7 +32,7 @@ def every1sec() :
 	threading.Timer(1, every1sec).start()
 
 def main() :
-    	pitch_aver = 180
+    	#pitch_aver = 180
 	a = Servo.servo()
     	b = degree_gyro.acc()
 	global count    	
@@ -41,9 +41,9 @@ def main() :
     	
 	que = []
 	timecheck_list = []    	
-	gyro_pitch_degree = b.pitch()		
-	acc_gyro_pitch = b.pitch()
-	#gyro_pitch_data = 0
+	#gyro_pitch_degree = b.pitch()		
+	#acc_gyro_pitch = b.pitch()
+	pitch_aver = acc_gyro_pitch = gyro_pitch_degree = b.pitch()
 
 #	every5sec()
 	every1sec()
@@ -64,19 +64,19 @@ def main() :
 		#count += 1		
 
 		"""
-		acc_pitch_degree = b.pitch()
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
         	f.write(data)
 		"""
 		acc_pitch_degree = b.pitch()
 
-		gyro_pitch_degree = b.gyro_pitch(loop_time, gyro_pitch_degree)
-		acc_gyro_pitch = (0.93 * gyro_pitch_degree) + (0.07 * acc_pitch_degree) 
-		print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
+		gyro_pitch_degree = b.gyro_pitch(loop_time, acc_gyro_pitch)
+		acc_gyro_pitch = (0.97 * gyro_pitch_degree) + (0.03 * acc_pitch_degree) 
+		#print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
 		
-		"""
-		que.append(b.pitch())
-		if(len(que) == 100):
+		
+		que.append((acc_gyro_pitch))
+		
+		if(len(que) == 10):
 			pitch_aver = sum(que,0.0)/len(que)
     			#print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, pitch_aver, count)
 			count += 1
@@ -84,19 +84,35 @@ def main() :
 		if(pitch_aver <=180 and pitch_aver >5):
 			a.servo_1(pwm_1 + (1.0 / 81000.0) * pow(pitch_aver, 2))
 			a.servo_2(pwm_2)
-			print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(pitch_aver, 2), pwm_2, pitch_aver, count)
+			print "pwm_v1 = %s pwm_v2 = %s \t\t  degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(pitch_aver, 2), pwm_2, pitch_aver, gyro_pitch_degree, acc_pitch_degree, count)
 			#print "180down"
 		elif(pitch_aver >180 and pitch_aver < 355):
 			a.servo_1(pwm_1)
 			a.servo_2(pwm_2 + (7.0 / 648000.0) * pow(360-pitch_aver, 2))
-			print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(360-pitch_aver, 2), pitch_aver, count)
+			print "pwm_v1 = %s pwm_v2 = %s \t\t degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(360-pitch_aver, 2), pitch_aver, gyro_pitch_degree, acc_pitch_degree, count)
 			#print "180up"
 		else:
 		        a.servo_1(pwm_1)
                         a.servo_2(pwm_2)
-			print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, pitch_aver, count)
+			print "pwm_v1 = %s pwm_v2 = %s \t\t degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, pitch_aver, gyro_pitch_degree, acc_pitch_degree, count)
+		
+		
 		"""
-
+		if(acc_gyro_pitch <=180 and acc_gyro_pitch >5):
+                        a.servo_1(pwm_1 + (1.0 / 81000.0) * pow(acc_gyro_pitch, 2))
+                        a.servo_2(pwm_2)
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(acc_gyro_pitch, 2), pwm_2, acc_gyro_pitch, count)
+                        #print "180down"
+                elif(acc_gyro_pitch >180 and acc_gyro_pitch < 355):
+                        a.servo_1(pwm_1)
+                        a.servo_2(pwm_2 + (7.0 / 648000.0) * pow(360-acc_gyro_pitch, 2))
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(360-acc_gyro_pitch, 2), acc_gyro_pitch, count)
+                        #print "180up"
+                else:
+                        a.servo_1(pwm_1)
+                        a.servo_2(pwm_2)
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, count)
+		"""
 		time.sleep(0.05)
 
 if __name__ == '__main__':
