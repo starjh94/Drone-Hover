@@ -35,45 +35,44 @@ def main() :
 	a = Servo.servo()
     	b = degree_gyro.acc()
 	global count    	
-	###ak_count = 0
+	ak_count = 0
 	#f = open("data.txt", 'w')
-    	
+ 	he = 1   	
 	que = []
 	timecheck_list = []    	
 	#gyro_pitch_degree = b.pitch()		
 	#acc_gyro_pitch = b.pitch()
 	pitch_aver = acc_gyro_pitch = gyro_pitch_degree = b.pitch()
-	###ooo = time.time()
+	ooo = time.time()
 #	every5sec()
 	every1sec()
 	
 	timecheck_list.append(time.time())
     	while(True):
-		"""
+		ddk5 = time.time()
 		if(ak_count == 0):
 			acc_gyro_pitch = b.pitch()
-		"""
 		#a.servo_1(pwm_1)
         	#a.servo_2(pwm_2)
 	
 		#print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, b.pitch(), count)
 		timecheck_list.append(time.time())
 		#print "loop time : %s" % (timecheck_list[1] - timecheck_list[0])
-		
 		loop_time = timecheck_list[1] - timecheck_list[0]
 		timecheck_list.pop(0)
-			
-		#count += 1		
+		ak_count += 1	
+		count += 1		
 
 		"""
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
         	f.write(data)
 		"""
 		acc_pitch_degree = b.pitch()
-		gyro_pitch_degree = b.gyro_pitch(loop_time, acc_gyro_pitch )
+		gyro_pitch_degree = b.new_gyro_pitch(loop_time -0.05, acc_gyro_pitch )
+		#print "G : ",gyro_pitch_degree, "A : ", b.pitch(), kkk2 - kkk
 		acc_gyro_pitch = (0.97 * gyro_pitch_degree) + (0.03 * acc_pitch_degree) 
 		#print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
-		
+		ak_count += 1
 		que.append((acc_gyro_pitch))
 		
 		
@@ -113,7 +112,8 @@ def main() :
                         a.servo_2(pwm_2)
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
 		"""
-		time.sleep(0.05)
-
+		
+		#time.sleep(0.05)
+		
 if __name__ == '__main__':
     main()

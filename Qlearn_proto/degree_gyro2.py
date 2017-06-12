@@ -35,12 +35,21 @@ class acc:
                 #pitch_gyro = m9g[a1]
         #       b.attitude2(m9a[0],m9a[1],m9a[2],m9g[0],m9g[1],m9g[2])
                 return pitch_gyro
-
+        def get_data(self):
+                m9a, m9g, m9m = acc.imu.getMotion9()
+                ax= m9a[0]
+		ay= m9a[1]
+		az= m9a[2]
+		gx= m9g[0]
+		gy= m9g[1]
+		gz= m9g[2]
+		return ax,ay,az,gx,gy,gz
 
 	def gyro_pitch(self, loop_time, previous_pitch):
 	#	b = tt3.comp_filt()
 		m9a, m9g, m9m = acc.imu.getMotion9()
 		#pitch_gyro = previous_pitch + (180 / math.pi) * m9g[1] * loop_time
+		print loop_time
 		pitch_gyro = previous_pitch + m9g[1] * loop_time
 		#print "m9g[1] : %s, loop_time : %s, old : %s, new : %s" % (m9g[1], loop_time, previous_pitch, pitch_gyro)
 		#pitch_gyro = m9g[a1]

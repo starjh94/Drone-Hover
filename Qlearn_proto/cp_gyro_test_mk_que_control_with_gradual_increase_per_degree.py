@@ -35,7 +35,7 @@ def main() :
 	a = Servo.servo()
     	b = degree_gyro.acc()
 	global count    	
-
+	ak_check = 0
 	#f = open("data.txt", 'w')
     	
 	que = []
@@ -49,10 +49,8 @@ def main() :
 	
 	timecheck_list.append(time.time())
     	while(True):
-		
 		#a.servo_1(pwm_1)
         	#a.servo_2(pwm_2)
-		gyro_pitch_degree = b.pitch()	
 		#print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, b.pitch(), count)
 		timecheck_list.append(time.time())
 		#print "loop time : %s" % (timecheck_list[1] - timecheck_list[0])

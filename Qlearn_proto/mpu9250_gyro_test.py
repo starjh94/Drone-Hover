@@ -453,9 +453,9 @@ class MPU9250:
 
         for i in range(0, 3):
             data = self.byte_to_float(response[i*2:i*2+2])
-            aa = self.gyroscope_data[i] = (self.PI/180)*data/self.gyro_divider
-            kk.append(aa)
-  #      print kk[0],kk[1],kk[2]
+            self.gyroscope_data[i] = data/self.gyro_divider
+	test = self.gyroscope_data
+	return test
 # -----------------------------------------------------------------------------------------------
 #                                 READ TEMPERATURE
 # usage: call this function to read temperature data.
@@ -544,8 +544,8 @@ class MPU9250:
         # Get gyroscope values
         for i in range(4, 7):
              data = self.byte_to_float(response[i*2:i*2+2])
-             b = self.gyroscope_data[i-4] =(self.PI/180)*data/self.gyro_divider
-             #b = self.gyroscope_data[i-4] = data/self.gyro_divider
+             #b = self.gyroscope_data[i-4] =(self.PI/180)*data/self.gyro_divider
+             b = self.gyroscope_data[i-4] = data/self.gyro_divider
 	     abc.append(b)
              #print abc[0],abc[1],abc[2]
         if(abc[0] > 16383 or abc[0] < -16383):
@@ -569,7 +569,7 @@ class MPU9250:
         m9g = self.gyroscope_data
         m9m = self.magnetometer_data
 
-        return m9a, m9g, m9m
+	return m9a, m9g, m9m
 
 # -----------------------------------------------------------------------------------------------
 

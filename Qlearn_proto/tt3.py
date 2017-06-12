@@ -66,7 +66,6 @@ class comp_filt:
             # Use accelerometer angles as initial angles
             self.pitch=math.atan2(ax,math.sqrt(math.pow(ay,2)+math.pow(az,2)))
             self.roll=-math.atan2(ay,math.sqrt(math.pow(ax,2)+math.pow(az,2)))
-            print "dfaf=", self.pitch()
         else:
             t1=time.time()
             dt=t1-self.previous_time
@@ -128,7 +127,7 @@ class comp_filt:
         k4 = self.roll_r=self.roll                #rad
         k5 = self.thetad_d=math.degrees(pitch_dot_g)#deg
         k6 = self.phid_d=math.degrees(roll_dot_g) #deg
-        print "hello=",k,"babo =",k2
+   #     print "hello=",k,"babo =",k2
    #     print "tu=",k5,"nin=",k6
 
     ########## ROLL, PITCH, YAW ##########
