@@ -17,9 +17,8 @@ class acc:
     	def pitch(self):
 
         	m9a, m9g, m9m = acc.imu.getMotion9()
-        	pitch_v = math.atan2(m9a[0], m9a[2]) * 180 / math.pi
-        	#print "pitch_v", pitch_v
-		pitch_v = (pitch_v + 360) % 360
+        	pitch_v = math.atan2(-m9a[0], m9a[2]) * 180 / math.pi
+		#pitch_v = (pitch_v + 360) % 360
 		
 		return pitch_v
         def new_gyro_pitch(self, loop_time,previous_pitch):
