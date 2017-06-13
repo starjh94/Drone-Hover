@@ -15,7 +15,4 @@ count = 0
 
 while(True):
 	m9a, m9g, m9m = imu.getMotion9()
-	print "x = ",m9g[0],"y = ",m9g[1],"z = ",m9g[2]
-	count += 1
-	if(count == 20):
-		break
+	a.attitude2(m9a[0],m9a[1],m9a[2],m9g[0],m9g[1],m9g[2])

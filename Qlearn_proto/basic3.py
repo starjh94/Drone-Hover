@@ -3,15 +3,14 @@ import degree_gyro2
 import threading
 import time
 import math
-import sys
-#sys.path.insert (1, '/sys/module')
+
 ## Initialize
 count = 1
 count2 = 0
 pwm_1 = 1.1
 pwm_2 = 1.22
-ax = 0.0 
-ay = 0.0
+ax = 0.0
+ay = 0.0 
 az = 0.0
 gx = 0.0
 gy = 0.0
@@ -24,7 +23,6 @@ t_prev = 0
 prev_pitch = 0.0
 acc_pitch = 0.0
 pitch_gyro = 0.0
-pitch_gyro2 = 0.0
 que = []
 acc_gyro_pitch = 0.0
 
@@ -69,7 +67,7 @@ def initDt():
 def calAccel():
 	global ax,ay,az,gx,gy,gz
 	global acc_pitch 
-	acc_pitch = math.atan2(ax, az) * 180 / math.pi 
+	acc_pitch = math.atan2(ax, az) * 180 / math.pi * -1
         acc_pitch = (acc_pitch + 360) % 360
 
 def calGyro():
@@ -77,11 +75,9 @@ def calGyro():
 	global dt
 	global pitch_gyro 
 	global count
-	global pitch_gyro2
 	if(count == 0):
 		prev_pitch = acc_pitch
 	pitch_gyro = prev_pitch + gy * dt
-	pitch_gyro2 = gy * dt
 	count += 1
 
 def compFilt():
@@ -92,32 +88,28 @@ def compFilt():
 	global count2
 	acc_gyro_pitch = (0.97 * pitch_gyro) + (0.03 * acc_pitch)
 	que.append(acc_gyro_pitch)
-	if(len(que) == 10):
-		"""
-		if(count2 == 100):
-			print "C : ", acc_gyro_pitch, "G : ", pitch_gyro, "A : ", acc_pitch
-			count2 = 0
-		"""
-		print "C : ", sum(que,0.0)/len(que) , "G : ", pitch_gyro2, "A : ", acc_pitch
-		que.pop(0)
-def servoCont():
-	global que
-	
+def conServo():
 	a = Servo.servo()
+	global pitch_gyro
+        global acc_pitch
+	global acc_gyro_pitch
+
+        if(acc_gyro_pitch  <=180 and acc_gyro_pitch >5):
+       		a.servo_1(pwm_1 + (1.0 / 81000.0) * pow(acc_gyro_pitch, 2))
+                a.servo_2(pwm_2)
+                print "pwm_v1 = %s pwm_v2 = %s \t\t  degree = C: %s\t<-\tG: %s vs A: %s " % (pwm_1 + (1.0 / 81000.0) * pow(acc_gyro_pitch, 2), pwm_2, acc_gyro_pitch, pitch_gyro, acc_pitch)
+                        #print "180down"
+        elif(acc_gyro_pitch >180 and acc_gyro_pitch < 355):
+                a.servo_1(pwm_1)
+                a.servo_2(pwm_2 + (7.0 / 648000.0) * pow(360-acc_gyro_pitch, 2))
+                print "pwm_v1 = %s pwm_v2 = %s \t\t degree = C: %s\t<-\tG: %s vs A: %s " % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(360-acc_gyro_pitch, 2), acc_gyro_pitch, pitch_gyro, acc_pitch)
+                        #print "180up"
+        else:
+                a.servo_1(pwm_1)
+                a.servo_2(pwm_2)
+                print "pwm_v1 = %s pwm_v2 = %s \t\t degree = C: %s\t<-\tG: %s vs A: %s " % (pwm_1, pwm_2, acc_gyro_pitch, pitch_gyro, acc_pitch)
+
 	
-	if(acc_gyro_pitch <=180 and acc_gyro_pitch > 5):
-		a.servo_1(pwm_1 + (1.0 / 81000.0) * pow(acc_gyro_pitch, 2))
-		a.servo_2(pwm_2)
-		print "pwm_v1 = %s pwm_v2 = %s \t\t  degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(pitch_aver, 2), pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-		#print "180down"
-	elif(acc_gyro_pitch >180 and acc_gyro_pitch < 355):
-		a.servo_1(pwm_1)
-		a.servo_2(pwm_2 + (7.0 / 648000.0) * pow(360-acc_gyro_pitch, 2))
-		print "pwm_v1 = %s pwm_v2 = %s \t\t degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(360-pitch_aver, 2), acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-		#print "180up"
-	else:
-		a.servo_1(pwm_1)
-		a.servo_2(pwm_2) 
 def setup():
 	initDt()
 
@@ -131,10 +123,11 @@ def loop():
 	calAccel() 
 	calGyro()
 	compFilt()
-	#servoCont()
 	prev_pitch = acc_gyro_pitch
+	print acc_gyro_pitch
+	conServo()
 	count2 += 1
-
+	time.sleep(0.05)
 def main():
 	print "start"
 	setup()
@@ -143,5 +136,4 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
 

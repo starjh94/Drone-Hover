@@ -127,7 +127,7 @@ class comp_filt:
         k4 = self.roll_r=self.roll                #rad
         k5 = self.thetad_d=math.degrees(pitch_dot_g)#deg
         k6 = self.phid_d=math.degrees(roll_dot_g) #deg
-   #     print "hello=",k,"babo =",k2
+        print "hello=",k,"babo =",k2
    #     print "tu=",k5,"nin=",k6
 
     ########## ROLL, PITCH, YAW ##########
@@ -251,4 +251,4 @@ class comp_filt:
         k7=self.thetad_d=math.degrees(pitch_dot_g)#deg
         k8=self.phid_d=math.degrees(roll_dot_g) #deg
         k9=self.psid_d=math.degrees(yaw_dot_g)  #deg	
-        print "heel = ", k , "hello2 = ", k2 , "heell3 = ",k3 
+        print "heel = ", k , "hello2 = ", k4

@@ -2,7 +2,6 @@
 MPU9250 driver code is placed under the BSD license.
 Copyright (c) 2014, Emlid Limited, www.emlid.com
 All rights reserved.
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
     * Redistributions of source code must retain the above copyright
@@ -13,7 +12,6 @@ modification, are permitted provided that the following conditions are met:
     * Neither the name of the Emlid Limited nor the names of its contributors
     may be used to endorse or promote products derived from this software
     without specific prior written permission.
-
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -342,7 +340,7 @@ class MPU9250:
             time.sleep(0.01) # I2C must slow down the write speed, otherwise it won't work
 
         self.set_acc_scale(self.__BITS_FS_16G)
-        self.set_gyro_scale(self.__BITS_FS_2000DPS)
+        self.set_gyro_scale(self.__BITS_FS_250DPS)
 
         self.calib_mag()
 
@@ -448,12 +446,14 @@ class MPU9250:
 # -----------------------------------------------------------------------------------------------
 
     def read_gyro(self):
+        kk = []
         response = self.ReadRegs(self.__MPUREG_GYRO_XOUT_H, 6)
 
         for i in range(0, 3):
             data = self.byte_to_float(response[i*2:i*2+2])
-            self.gyroscope_data[i] = (self.PI/180)*data/self.gyro_divider
-
+            aa = self.gyroscope_data[i] = (self.PI/180)*data/self.gyro_divider
+            kk.append(aa)
+  #      print kk[0],kk[1],kk[2]
 # -----------------------------------------------------------------------------------------------
 #                                 READ TEMPERATURE
 # usage: call this function to read temperature data.
@@ -525,26 +525,31 @@ class MPU9250:
         # Read 7 bytes from the magnetometer
         self.WriteReg(self.__MPUREG_I2C_SLV0_CTRL, 0x87)
         # must start your read from AK8963A register 0x03 and read seven bytes so that upon read of ST2 register 0x09 the AK8963A will unlatch the data registers for the next measurement.
-
+        abc = []
         # time.sleep(0.001)
         response = self.ReadRegs(self.__MPUREG_ACCEL_XOUT_H, 21);
 
         # Get Accelerometer values
         for i in range(0, 3):
             data = self.byte_to_float(response[i*2:i*2+2])
-            self.accelerometer_data[i] = self.G_SI*data/self.acc_divider
+            k = self.accelerometer_data[i] = self.G_SI*data/self.acc_divider
 
         # Get temperature
         i = 3
         temp = self.byte_to_float(response[i*2:i*2+2])
         self.temperature = (temp/340.0)+36.53
-
+       
         # Get gyroscope values
         for i in range(4, 7):
-            data = self.byte_to_float(response[i*2:i*2+2])
-            self.gyroscope_data[i-4] =(self.PI/180)*data/self.gyro_divider
-
-        # Get magnetometer values
+             data = self.byte_to_float(response[i*2:i*2+2])
+             b = self.gyroscope_data[i-4] =(self.PI/180)*data/self.gyro_divider
+             abc.append(b)
+            #print abc[0],abc[1],abc[2]
+        if(abc[0] > 16383 or abc[0] < -16383):
+	     print "over the range" 
+	#print abc[0] , abc[1] ,abc[2]
+        #time.sleep(0.1)
+	# Get magnetometer values
         for i in range(7, 10):
             data = self.byte_to_float_le(response[i*2:i*2+2])
             self.magnetometer_data[i-7] = data * self.magnetometer_ASA[i-7]
@@ -587,7 +592,3 @@ class MPU9250:
         byte_array = array.array("B", input_buffer)
         signed_16_bit_int, = struct.unpack("<h", byte_array)
         return float(signed_16_bit_int)
-
-
-
-

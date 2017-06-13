@@ -7,3 +7,4 @@ while(True):
 	attitude2(
 	acc_v = a.acc360()	
 	print value	
+#~~~~~

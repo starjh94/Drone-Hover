@@ -2,13 +2,10 @@ import Servo
 import degree_gyro
 import threading
 import time
-
 ## Initialize
 count = 1
 pwm_1 = 1.1
 pwm_2 = 1.22
-l_plus_pwm = 0.45
-r_plus_pwm = 0.4
 f = open("data.txt", 'w')
 
 ## Using threading Timer
@@ -42,7 +39,6 @@ def main() :
 	#f = open("data.txt", 'w')
     	
 	que = []
-	acc_que = []
 	timecheck_list = []    	
 	#gyro_pitch_degree = b.pitch()		
 	#acc_gyro_pitch = b.pitch()
@@ -73,22 +69,15 @@ def main() :
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
         	f.write(data)
 		"""
-		
 		acc_pitch_degree = b.pitch()
-		acc_que.append(acc_pitch_degree)
-		if(len(acc_que) == 10):
-			acc_pitch_degree = sum(acc_que, 0.0)/len(acc_que)
-			que.pop(0)	
-	
 		gyro_pitch_degree = b.gyro_pitch(loop_time, acc_gyro_pitch )
 		acc_gyro_pitch = (0.97 * gyro_pitch_degree) + (0.03 * acc_pitch_degree) 
 		#print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
 		
-		#que.append((acc_gyro_pitch))
+		que.append((acc_gyro_pitch))
 		
 		"""
 		## <Control Code> Use Queue & Degree : 0 ~ 360 ##
-
 		if(len(que) == 10):
 			pitch_aver = sum(que,0.0)/len(que)
     			#print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, pitch_aver, count)
@@ -127,69 +116,17 @@ def main() :
                         a.servo_2(pwm_2)
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
 		"""
-
-
-
-
-
-		"""
-		## <Basic_Control Code> NO Queue & Degree : -180 ~ 180 ##
-
-                if(acc_gyro_pitch >= -70 and acc_gyro_pitch < -5):
-                        a.servo_1(pwm_1 + (0.45 / 4900.0) * pow(abs(acc_gyro_pitch), 2))
-                        a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + (0.45 / 4900.0) * pow(abs(acc_gyro_pitch), 2), pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-                        #print "180down"
-		elif(acc_gyro_pitch < -70 and acc_gyro_pitch >= -180):
-			a.servo_1(pwm_1 + l_plus_pwm)
-                        a.servo_2(pwm_2)
-			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + l_plus_pwm, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-                elif(acc_gyro_pitch <= 70 and acc_gyro_pitch > 5):
-                        a.servo_1(pwm_1)
-                        a.servo_2(pwm_2 + (0.4 / 4900.0) * pow(acc_gyro_pitch, 2))
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + (0.4 / 4900.0) * pow(acc_gyro_pitch, 2), acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-                        #print "180up"
-		elif(acc_gyro_pitch < 180 and acc_gyro_pitch > 90):
-			a.servo_1(pwm_1)
-                        a.servo_2(pwm_2 + r_plus_pwm)
-			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + r_plus_pwm, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-                else:
-                        a.servo_1(pwm_1)
-                        a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-		"""
-
-
-
 		
-		"""
-		## <Test_Control Code> NO Queue & Degree : -180 ~ 180 ##
+		## <Control Code> NO Queue & Degree : -180 ~ 180 ##
 
                 if(acc_gyro_pitch >= -180 and acc_gyro_pitch < -5):
-                        a.servo_1(pwm_1 + (0.4 / 32400.0) * pow(abs(acc_gyro_pitch), 2))
-                        a.servo_2(pwm_2 - (0.18 / 32400.0) * pow(abs(acc_gyro_pitch),2))
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(abs(acc_gyro_pitch), 2), pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-                        #print "180down"
-                elif(acc_gyro_pitch <= 180 and acc_gyro_pitch > 5):
-                        a.servo_1(pwm_1 - (0.2 / 32400.0) * pow(acc_gyro_pitch, 2))
-                        a.servo_2(pwm_2 + (0.35 / 32400.0) * pow(acc_gyro_pitch, 2))
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(acc_gyro_pitch, 2), acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-                        #print "180up"
-                else:
-                        a.servo_1(pwm_1)
-                        a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-		"""
-		## <Test2_Control Code> NO Queue & Degree : -180 ~ 180 ##
-
-                if(acc_gyro_pitch >= -180 and acc_gyro_pitch < -5):
-                        a.servo_1(pwm_1 + (0.4 / 32400.0) * pow(abs(acc_gyro_pitch), 2))
+                        a.servo_1(pwm_1 + (1.0 / 81000.0) * pow(abs(acc_gyro_pitch), 2))
                         a.servo_2(pwm_2)
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 + (1.0 / 81000.0) * pow(abs(acc_gyro_pitch), 2), pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
                         #print "180down"
                 elif(acc_gyro_pitch <= 180 and acc_gyro_pitch > 5):
                         a.servo_1(pwm_1)
-                        a.servo_2(pwm_2 + (0.35 / 32400.0) * pow(acc_gyro_pitch, 2))
+                        a.servo_2(pwm_2 + (7.0 / 648000.0) * pow(acc_gyro_pitch, 2))
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2 + (7.0 / 648000.0) * pow(acc_gyro_pitch, 2), acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
                         #print "180up"
                 else:
@@ -199,7 +136,8 @@ def main() :
 
 
 
-		time.sleep(0.04)
+
+		time.sleep(0.05)
 
 if __name__ == '__main__':
     main()
