@@ -43,7 +43,7 @@ def main() :
 	global count    	
 	###ak_count = 0
 	#f = open("data.txt", 'w')
-    	
+	    	
 	que = []
 	acc_que = []
 	timecheck_list = []
@@ -51,7 +51,7 @@ def main() :
 	#acc_gyro_pitch = b.pitch()
 	pitch_aver = acc_gyro_pitch = gyro_pitch_degree = b.pitch()
 	
-	time_count = time.time()
+	start_time = time.time()
 	
 	np_gyro_degree = np.array([[0, gyro_pitch_degree]])
 	np_acc_degree = np.array([[0, b.pitch()]])
@@ -97,12 +97,10 @@ def main() :
 		
 
 		## for matplotlib ##
-		np_gyro_degree = np.append(np_gyro_degree, [[time.time() - time_count, gyro_pitch_degree]], axis=0)
-        	np_acc_degree = np.append(np_acc_degree, [[time.time() - time_count, acc_pitch_degree]], axis=0)
-        	np_acc_gyro = np.append(np_acc_gyro, [[time.time() - time_count, acc_gyro_pitch]], axis=0)
+		np_gyro_degree = np.append(np_gyro_degree, [[time.time() - start_time, gyro_pitch_degree]], axis=0)
+        	np_acc_degree = np.append(np_acc_degree, [[time.time() - start_time, acc_pitch_degree]], axis=0)
+        	np_acc_gyro = np.append(np_acc_gyro, [[time.time() - start_time, acc_gyro_pitch]], axis=0)
 		
-		time_count = time.time()
-
 		np.save('gyro_degree_Data', np_gyro_degree)
 		np.save('acc_degree_Data', np_acc_degree)
 		np.save('accGyro_degree_Data', np_acc_gyro)

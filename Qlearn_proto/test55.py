@@ -35,10 +35,12 @@ class acc:
 			else:
 				pitch_v = abs(pitch_v)		
 		"""
-		sqrt_v = math.sqrt( pow(m9a[1],2) + pow(m9a[2],2))
-		pitch_v = math.atan2(m9a[0],sqrt_v) * 180 / math.pi
+		sqrt_v = math.sqrt( pow(m9a[1],2) + pow(m9a[0],2))
+		#sqrt_v = math.sqrt( pow(m9a[1],2) + pow(m9a[2],2))
+		#pitch_v = math.atan2(m9a[0],sqrt_v) * -180 / math.pi
+		pitch_v = math.atan2(sqrt_v,m9a[2]) * 180 / math.pi
+		#pitch_v = math.atan(m9a[0]/sqrt_v) * -180 / math.pi
 		#pitch_v = (pitch_v + 360) % 360
-		
 		#print "\n%s, %s => %s\n" % (m9a[0], m9a[2], pitch_v)		
 		return pitch_v
         

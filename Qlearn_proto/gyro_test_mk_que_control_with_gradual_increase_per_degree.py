@@ -1,14 +1,15 @@
 import Servo
+import numpy as np
 import degree_gyro
 import threading
 import time
 
 ## Initialize
 count = 1
-#pwm_1 = 1.1
-#pwm_2 = 1.22
-pwm_1 = 1.15
-pwm_2 = 1.3
+pwm_1 = 1.1
+pwm_2 = 1.22
+#pwm_1 = 1.15
+#pwm_2 = 1.3
 l_plus_pwm = 0.42
 r_plus_pwm = 0.37
 f = open("data.txt", 'w')
@@ -49,8 +50,14 @@ def main() :
 	#gyro_pitch_degree = b.pitch()		
 	#acc_gyro_pitch = b.pitch()
 	pitch_aver = acc_gyro_pitch = gyro_pitch_degree = b.pitch()
-	###ooo = time.time()
-#	every5sec()
+	
+	start_time = time.time() 
+        
+	np_gyro_degree = np.array([[0, gyro_pitch_degree]])
+        np_acc_degree = np.array([[0, b.pitch()]])
+	np_acc_gyro = np.array([[0, acc_gyro_pitch]])
+
+	#every5sec()
 	every1sec()
 	
 	timecheck_list.append(time.time())
@@ -69,7 +76,7 @@ def main() :
 		loop_time = timecheck_list[1] - timecheck_list[0]
 		timecheck_list.pop(0)
 			
-		count += 1		
+		#count += 1		
 
 		"""
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
@@ -89,6 +96,15 @@ def main() :
 		time_count = time.time()
 		#que.append((acc_gyro_pitch))
 		
+		## for matplotlib ##
+                np_gyro_degree = np.append(np_gyro_degree, [[time.time() - start_time, gyro_pitch_degree]], axis=0)
+                np_acc_degree = np.append(np_acc_degree, [[time.time() - start_time, acc_pitch_degree]], axis=0)
+                np_acc_gyro = np.append(np_acc_gyro, [[time.time() - start_time, acc_gyro_pitch]], axis=0)
+
+                np.save('gyro_degree_Data', np_gyro_degree)
+                np.save('acc_degree_Data', np_acc_degree)
+                np.save('accGyro_degree_Data', np_acc_gyro)
+
 		"""
 		## <Control Code> Use Queue & Degree : 0 ~ 360 ##
 
@@ -132,7 +148,7 @@ def main() :
 		"""
 
 
-		"""
+		
 
 		## <Basic_Control Code> NO Queue & Degree : -180 ~ 180 ##
 
@@ -160,7 +176,7 @@ def main() :
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
 		time_count2 = time.time()
 
-		"""
+		
 		"""
 		## <Test_Control Code> NO Queue & Degree : -180 ~ 180 ##
 
@@ -197,7 +213,8 @@ def main() :
                         a.servo_2(pwm_2)
                         print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
 		"""
-                ## <Basic_Control Code> NO Queue & Degree : -180 ~ 180 ##
+               	"""
+		 ## <Basic_Control Code> NO Queue & Degree : -180 ~ 180 ##
 
                 if(acc_gyro_pitch < 0 ):
                         a.servo_1(pwm_1 - 0.5 * acc_gyro_pitch/90 )
@@ -208,6 +225,8 @@ def main() :
                         a.servo_1(pwm_1 )
                         a.servo_2(pwm_2 )
 			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 , pwm_2 + 0.15, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
+		"""
+		count += 1
 		time.sleep(0.01)
 
 if __name__ == '__main__':
