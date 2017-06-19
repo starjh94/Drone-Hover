@@ -2,6 +2,7 @@ import Servo
 import degree_gyro
 import threading
 import time
+import numpy as np
 
 ## Initialize
 count = 1
@@ -45,12 +46,18 @@ def main() :
     	
 	que = []
 	acc_que = []
-	timecheck_list = []    	
+	timecheck_list = []
 	#gyro_pitch_degree = b.pitch()		
 	#acc_gyro_pitch = b.pitch()
 	pitch_aver = acc_gyro_pitch = gyro_pitch_degree = b.pitch()
-	###ooo = time.time()
-#	every5sec()
+	
+	time_count = time.time()
+	
+	np_gyro_degree = np.array([[0, gyro_pitch_degree]])
+	np_acc_degree = np.array([[0, b.pitch()]])
+	np_acc_gyro = np.array([[0, acc_gyro_pitch]])    	
+
+	#every5sec()
 	every1sec()
 	
 	timecheck_list.append(time.time())
@@ -69,7 +76,7 @@ def main() :
 		loop_time = timecheck_list[1] - timecheck_list[0]
 		timecheck_list.pop(0)
 			
-		count += 1		
+		#count += 1		
 
 		"""
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, acc_pitch_degree)
@@ -86,8 +93,19 @@ def main() :
 		gyro_pitch_degree = b.gyro_pitch(loop_time, acc_gyro_pitch)
 		acc_gyro_pitch = (0.97 * gyro_pitch_degree) + (0.03 * acc_pitch_degree) 
 		#print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
-		time_count = time.time()
 		#que.append((acc_gyro_pitch))
+		
+
+		## for matplotlib ##
+		np_gyro_degree = np.append(np_gyro_degree, [[time.time() - time_count, gyro_pitch_degree]], axis=0)
+        	np_acc_degree = np.append(np_acc_degree, [[time.time() - time_count, acc_pitch_degree]], axis=0)
+        	np_acc_gyro = np.append(np_acc_gyro, [[time.time() - time_count, acc_gyro_pitch]], axis=0)
+		
+		time_count = time.time()
+
+		np.save('gyro_degree_Data', np_gyro_degree)
+		np.save('acc_degree_Data', np_acc_degree)
+		np.save('accGyro_degree_Data', np_acc_gyro)
 		
 		"""
 		## <Control Code> Use Queue & Degree : 0 ~ 360 ##
@@ -208,7 +226,8 @@ def main() :
                         a.servo_1(pwm_1 )
                         a.servo_2(pwm_2 )
 			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 , pwm_2 + 0.15, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
-		time.sleep(0.01)
+		count += 1
+		time.sleep(0.05)
 
 if __name__ == '__main__':
     main()

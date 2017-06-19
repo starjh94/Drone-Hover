@@ -1,5 +1,5 @@
 import Servo
-import degree_gyro
+import test55
 import threading
 import time
 
@@ -15,7 +15,7 @@ f = open("data.txt", 'w')
 
 ## Using threading Timer
 def every5sec() :
-    	b = degree_gyro.acc()
+    	b = test55.acc()
     
     	global pwm_1
     	pwm_1 += 0.01
@@ -38,7 +38,7 @@ def every1sec() :
 def main() :
     	#pitch_aver = 180
 	a = Servo.servo()
-    	b = degree_gyro.acc()
+    	b = test55.acc()
 	global count    	
 	###ak_count = 0
 	#f = open("data.txt", 'w')
