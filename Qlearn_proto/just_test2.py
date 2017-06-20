@@ -80,7 +80,7 @@ def main() :
 			acc_pitch_degree = sum(acc_que, 0.0)/len(acc_que)
 			acc_que.pop(0)	
 	
-		gyro_pitch_degree = b.gyro_pitch(loop_time, acc_gyro_pitch )
+		gyro_pitch_degree = b.gyro_pitch(loop_time, gyro_pitch_degree )
 		acc_gyro_pitch = (0.97 * gyro_pitch_degree) + (0.03 * acc_pitch_degree) 
 		#print "%s vs %s : %s" % (acc_pitch_degree, gyro_pitch_degree, acc_gyro_pitch)
 		
