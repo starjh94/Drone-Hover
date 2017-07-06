@@ -6,13 +6,15 @@ import time
 
 ## Initialize
 count = 1
-init_pwm_1 = 1.1
-init_pwm_2 = 1.22
+init_pwm_1 = 1.31
+init_pwm_2 = 1.4
 #pwm_1 = 1.15
 #pwm_2 = 1.3
 l_plus_pwm = 0.42
 r_plus_pwm = 0.37
+f = open("data.txt", 'w')
 
+## matplotlib data initialization ##
 np_gyro_degree = np.array([[0, 0]])
 np_acc_degree = np.array([[0, 0]])
 np_acc_gyro = np.array([[0, 0]])
@@ -20,7 +22,7 @@ np_acc_gyro = np.array([[0, 0]])
 np_left_motor = np.array([[0, 0]])
 np_right_motor = np.array([[0, 0]])
 
-f = open("data.txt", 'w')
+
 
 ## Using threading Timer
 def every5sec() :
@@ -51,11 +53,11 @@ def main() :
 	global count
 	global init_pwm_1
 	global init_pwm_2
-        global np_gyro_degree
-        global np_acc_degree
-        global np_acc_gyro
-        global np_left_motor
-        global np_right_motor    	
+	global np_gyro_degree
+	global np_acc_degree
+	global np_acc_gyro
+	global np_left_motor
+	global np_right_motor    	
 	###ak_count = 0
 	#f = open("data.txt", 'w')
     	
@@ -68,17 +70,17 @@ def main() :
 	pwm_1 = init_pwm_1
 	pwm_2 = init_pwm_2
 	
-	start_time = time.time() 
-        
+	start_time = time.time()  
 	
+
 	## matplotlib data initialization ##
 	np_gyro_degree = np.array([[0, gyro_pitch_degree]])
-        np_acc_degree = np.array([[0, b.pitch()]])
+	np_acc_degree = np.array([[0, b.pitch()]])
 	np_acc_gyro = np.array([[0, acc_gyro_pitch]])
 
 	np_left_motor = np.array([[0, init_pwm_1]])
 	np_right_motor = np.array([[0, init_pwm_2]])
-
+	
 	#every5sec()
 	every1sec()
 	
@@ -176,45 +178,31 @@ def main() :
 		
 
 		## <Basic_Control Code> NO Queue & Degree : -180 ~ 180 ##
-
+		a.servo_1(pwm_1)
+                a.servo_2(pwm_2)
+		
+		"""
                 if(acc_gyro_pitch >= -70 and acc_gyro_pitch < -5):
-                        pwm_1 = init_pwm_1 + (0.42 / 4900.0) * pow(abs(acc_gyro_pitch), 2)
-			pwm_2 = init_pwm_2
-		
 			a.servo_1(pwm_1)
                         a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
 		elif(acc_gyro_pitch < -70 and acc_gyro_pitch >= -180):
-			pwm_1 = init_pwm_1 + l_plus_pwm
-			pwm_2 = init_pwm_2	
-		
 			a.servo_1(pwm_1)
                         a.servo_2(pwm_2)
-			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
+			#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
                 elif(acc_gyro_pitch <= 70 and acc_gyro_pitch > 5):
-                        pwm_1 = init_pwm_1
-			pwm_2 = init_pwm_2 + (0.37 / 4900.0) * pow(acc_gyro_pitch, 2)
-
 			a.servo_1(pwm_1)
                         a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
 		elif(acc_gyro_pitch < 180 and acc_gyro_pitch > 90):
-			pwm_1 = init_pwm_1
-			pwm_2 = init_pwm_2 + r_plus_pwm
-
 			a.servo_1(pwm_1)
-                        a.servo_2(pwm_2 + r_plus_pwm)
-			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
+                        a.servo_2(pwm_2)	
+			#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
                 else:
-			pwm_1 = init_pwm_1
-			pwm_2 = init_pwm_2
-	
                         a.servo_1(pwm_1)
                         a.servo_2(pwm_2)
-                        print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
-		time_count2 = time.time()
-
-		
+                        #print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1, pwm_2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree, count)
+		"""
 		"""
 		## <Test_Control Code> NO Queue & Degree : -180 ~ 180 ##
 
