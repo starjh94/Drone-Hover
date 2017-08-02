@@ -51,11 +51,10 @@ def main() :
 	
 		print "pwm_v1 = %s pwm_v2 = %s degree = %s ---- count : %s" % (pwm_1, pwm_2, b.pitch(), count)
 		timecheck_list.append(time.time())
-		print "loop time : %s" % (timecheck_list[1] - timecheck_list[0])
+		#print "loop time : %s" % (timecheck_list[1] - timecheck_list[0])
 		timecheck_list.pop(0)
 			
 		count += 1		
-
 		"""
 		data = "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, b.pitch())
         	f.write(data)
