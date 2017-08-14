@@ -268,7 +268,7 @@ def main() :
 			print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s ---- count : %s" % (pwm_1 , pwm_2 + 0.15, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree ,count)
 		"""
 		count += 1
-		#time.sleep(0.01)
+		time.sleep(0.01)
 
 if __name__ == '__main__':
     	try :
