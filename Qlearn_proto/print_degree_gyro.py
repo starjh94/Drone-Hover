@@ -43,6 +43,29 @@ class acc:
 		#print "\n%s, %s => %s\n" % (m9a[0], m9a[2], pitch_v)		
 		return pitch_v
         
+
+
+	def pitchMore(self):
+
+                m9a, m9g, m9m = acc.imu.getMotion9()
+		pitch_v = -math.atan2(m9a[0], m9a[2]) * 180 / math.pi
+                #sqrt_v = math.sqrt( pow(m9a[0],2) + pow(m9a[2],2))
+                #pitch_v = math.atan2(m9a[2],sqrt_v) * 180 / math.pi
+                #pitch_v = (pitch_v + 360) % 360
+                #print "\n%s, %s => %s\n" % (m9a[0], m9a[2], pitch_v)           
+                return m9a[0], m9a[2], pitch_v
+	
+	def pitch_3axis(self):
+
+                m9a, m9g, m9m = acc.imu.getMotion9()
+                #pitch_v = -math.atan2(m9a[0], m9a[2]) * 180 / math.pi
+                sqrt_v = math.sqrt(pow(m9a[1],2) + pow(m9a[2],2))
+		pitch_v = -math.atan2(m9a[0], sqrt_v) * 180 / math.pi
+                #pitch_v = math.atan2(m9a[2],sqrt_v) * 180 / math.pi
+                #pitch_v = (pitch_v + 360) % 360
+                #print "\n%s, %s => %s\n" % (m9a[0], m9a[2], pitch_v)           
+                return m9a[0]/sqrt_v, pitch_v
+
 	"""
 	def new_gyro_pitch(self, loop_time,previous_pitch):
         #       b = tt3.comp_filt()
@@ -66,7 +89,7 @@ class acc:
 		#pitch_gyro = previous_pitch + (180 / math.pi) * m9g[1] * loop_time
 		pitch_gyro = previous_pitch + m9g[1] * loop_time
 		#print "m9g[1] : %s, loop_time : %s, old : %s, new : %s" % (m9g[1], loop_time, previous_pitch, pitch_gyro)
-			
+		
 		## <boundary value change> Degree -180 ~ +180 		
 		if (pitch_gyro > -180 and pitch_gyro < 180):
 			pass
@@ -74,7 +97,6 @@ class acc:
 			pitch_gyro = 360 + pitch_gyro	## x = 180 - ( abs(x) - 180 )	 	
 		else: 	## (pitch_gyro >= 180)
 			pitch_gyro = -360 + pitch_gyro 
-		
 		"""
 		## <boundary value change> Degree 0 ~ 360
 		if (pitch_gyro > 0 and pitch_gyro < 360):
@@ -86,6 +108,34 @@ class acc:
 		"""
 
 		return pitch_gyro
+
+	def gyro_pitchMore(self, loop_time, previous_pitch):
+
+
+                m9a, m9g, m9m = acc.imu.getMotion9()
+                #pitch_gyro = previous_pitch + (180 / math.pi) * m9g[1] * loop_time
+                dt = m9g[1] * loop_time
+		pitch_gyro = previous_pitch + dt
+                #print "m9g[1] : %s, loop_time : %s, old : %s, new : %s" % (m9g[1], loop_time, previous_pitch, pitch_gyro)
+
+                ## <boundary value change> Degree -180 ~ +180           
+                if (pitch_gyro > -180 and pitch_gyro < 180):
+                        pass
+                elif (pitch_gyro <= -180):
+                        pitch_gyro = 360 + pitch_gyro   ## x = 180 - ( abs(x) - 180 )           
+                else:   ## (pitch_gyro >= 180)
+                        pitch_gyro = -360 + pitch_gyro
+                """
+                ## <boundary value change> Degree 0 ~ 360
+                if (pitch_gyro > 0 and pitch_gyro < 360):
+                        pass
+                elif (pitch_gyro >= 360):       ## Over Boundary : Clockwise Rotation
+                        pitch_gyro = -360 + pitch_gyro
+                else:   ## Over Boundary : Counterclockwise Rotation, (pitch_gyro <= 0)
+                        pitch_gyro = 360 + pitch_gyro                           
+                """
+
+                return dt, pitch_gyro
 
     	def roll(self):
 
