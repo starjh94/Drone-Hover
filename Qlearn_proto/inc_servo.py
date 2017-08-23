@@ -15,7 +15,7 @@ def every5sec() :
     
     	#print "pwm_v1 = %s pwm_v2 = %s degree = %s \n" % (pwm_1, pwm_2, b.pitch())
     	print "\n\n\n\n\n\n\n\n\n---------------------motor up---------------------"
-	threading.Timer(5, every5sec).start()
+	threading.Timer(2, every5sec).start()
 
 
 def main() :
