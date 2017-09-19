@@ -64,13 +64,9 @@ class acc:
 		
 		m9a, m9g, m9m = acc.imu.getMotion9()
 		#pitch_gyro = previous_pitch + (180 / math.pi) * m9g[1] * loop_time
-		"""
-		p_ang_vel = m9g[1] * loop_time
-		pitch_gyro = previous_pitch + p_ang_vel
-		"""
+		
 		pitch_gyro = previous_pitch + m9g[1] * loop_time
 		#print "m9g[1] : %s, loop_time : %s, old : %s, new : %s" % (m9g[1], loop_time, previous_pitch, pitch_gyro)
-			
 		## <boundary value change> Degree -180 ~ +180 		
 		if (pitch_gyro > -180 and pitch_gyro < 180):
 			pass
@@ -89,7 +85,7 @@ class acc:
 			pitch_gyro = 360 + pitch_gyro		 		
 		"""
 
-		return pitch_gyro
+		return pitch_gyro, m9g[1]
 
     	def roll(self):
 
