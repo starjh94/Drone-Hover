@@ -3,7 +3,7 @@ import numpy as np
 import degree_gyro_q_l
 import threading
 import time
-
+import pdb
 import tensorflow as tf
 import random
 import dqn
@@ -190,6 +190,7 @@ def main() :
 
 			timecheck_list.append(time.time())
                 	loop_time = timecheck_list[1] - timecheck_list[0]
+			pdb.set_trace()
 			timecheck_list.pop(0)
 			
 			acc_pitch_degree = b.pitch()			
@@ -233,7 +234,8 @@ def main() :
 
                         	gyro_pitch_degree, _ = b.gyro_pitch(loop_time, gyro_pitch_degree)
                         	get_gyro_degree, p_ang_vel = b.gyro_pitch(loop_time, acc_gyro_pitch)
-                        	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))				
+                        	pdb.set_trace()
+				acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))				
 				
 				next_state = np.array([acc_gyro_pitch, p_ang_vel])				
 				

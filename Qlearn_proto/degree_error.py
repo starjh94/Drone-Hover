@@ -33,7 +33,6 @@ class Manual_control(threading.Thread):
                         period1 = rcin.read(0)
                         period3 = rcin.read(2)
 
-
 def main():
 	manual = Manual_control(name='recv_rc')
 	global period1
@@ -79,8 +78,18 @@ def main():
         	acc_pitch_degree = b.pitch()
         	gyro_pitch_degree = b.gyro_pitch(loop_time, gyro_pitch_degree)
         	get_gyro_degree = b.gyro_pitch(loop_time, acc_gyro_pitch)
-        	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
 		
+		degree_sign = np.sign(get_gyro_degree)
+		if((degree_sign * np.sign(acc_pitch_degree)) == 1):
+			acc_gyro_pitch = degree_sign * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
+		elif(get_gyro_degree == 0 and acc_pitch_degree == 0):
+			acc_gyro_pitch = degree_sign * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
+		else:
+			if(get_gyro_degree < 90 and get_gyro_degree > -90):
+				acc_gyro_pitch = 0.97 * get_gyro_degree + 0.03 * acc_pitch_degree
+			else:
+				acc_gyro_pitch = degree_sign * ((0.97 * abs(get_gyro_degree)) + (0.03 * (360 - abs(acc_pitch_degree))))	
+			
 		## servo part ##
 		servo_pwm1 = pwm_1 + (int(period3) - 982) * 0.00049 
 		servo_pwm2 = pwm_2 + (int(period1) - 982) * 0.00049
@@ -99,7 +108,7 @@ def main():
 		"""
 		np_ML_data = np.append(np_ML_data, [[data_time, acc_gyro_pitch, acc_pitch_degree, gyro_pitch_degree, servo_pwm1, servo_pwm2]], axis=0)		
 		
-       		print "<time: %.16s> : degree= %.16s    \tpwm_1= %.5s pwm2= %.5s" % (data_time, acc_gyro_pitch, servo_pwm1, servo_pwm2)
+       		print "<time: %.16s> : degree= %s    \tG = %s A = %s" % (data_time, acc_gyro_pitch, get_gyro_degree, acc_pitch_degree)
 		#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s" % (servo_pwm1, servo_pwm2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree)	
 		time.sleep(0.01)
 	

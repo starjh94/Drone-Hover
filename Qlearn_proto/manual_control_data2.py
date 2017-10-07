@@ -5,7 +5,7 @@ import navio.util
 import navio.pwm
 import degree_gyro
 import numpy as np
-
+import pdb
 import Servo
 import threading
 period1 = 0
@@ -101,6 +101,7 @@ def main():
 		
        		print "<time: %.16s> : degree= %.16s    \tpwm_1= %.5s pwm2= %.5s" % (data_time, acc_gyro_pitch, servo_pwm1, servo_pwm2)
 		#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s" % (servo_pwm1, servo_pwm2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree)	
+		pdb.set_trace() 
 		time.sleep(0.01)
 	
 if __name__ == '__main__':

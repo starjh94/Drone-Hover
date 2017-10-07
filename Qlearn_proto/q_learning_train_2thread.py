@@ -35,6 +35,37 @@ np_acc_gyro = np.array([[0, 0]])
 np_left_motor = np.array([[0, 0]])
 np_right_motor = np.array([[0, 0]])
 """
+"""
+
+class Degree(Threading.Thread):
+	def __init__(self):
+		self.acc_gyro_pitch = 0
+		self.p_ang_vel = 0		
+
+	def run(self):
+		degree = degree_gyro_q_l.acc()
+		
+		timecheck_list = []
+		self.acc_gyro_pitch = gyro_pitch_degree = b.pitch()
+		
+		start_time = time.time()
+		timecheck_list.append(start_time)
+		while(True):
+			acc_pitch_degree = b.pitch()
+			
+			timecheck_list.append(time.time())
+        		loop_time = timecheck_list[1] - timecheck_list[0]
+        		timecheck_list.pop(0)
+			
+			gyro_pitch_degree, _ = b.gyro_pitch(loop_time, gyro_pitch_degree)
+        		get_gyro_degree, self.p_ang_vel = b.gyro_pitch(loop_time, self.acc_gyro_pitch)
+        		self.acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
+	
+	def getDegree(self):
+		return self.acc_gyro_pitch, self.p_ang_vel
+
+
+"""
 
 def replay_train(mainDQN, targetDQN, train_batch):
 	x_stack = np.empty(0).reshape(0, input_size)
