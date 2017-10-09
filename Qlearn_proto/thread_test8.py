@@ -1,24 +1,10 @@
+import threading
 import degree_gyro_q_l
 import numpy as np
 import time
 import sysv_ipc
-
-def safeBoundary(value):
-	## <boundary value change> Degree -180 ~ +180 		
-	if (value > -180 and value < 180):
-		pass
-	elif (value <= -180):
-		value = 360 + value	## x = 180 - ( abs(x) - 180 )	 	
-	else: 	## (pitch_gyro >= 180)
-		value = -360 + value
-	
-	return value 
-
-share_acc_gyro_pitch = sysv_ipc.SharedMemory(600, flags=01000, size=20 ,mode=0600)
-share_p_ang_vel = sysv_ipc.SharedMemory(1024, flags=01000,size=20 ,mode=0600)
-#share_acc_gyro_pitch = sysv_ipc.SharedMemory(1234, flags=0, size=20, mode=0600)
-#share_p_ang_vel = sysv_ipc.SharedMemory(12345, flags=0)
-
+share_acc_gyro_pitch = sysv_ipc.SharedMemory(1 , flags=01000,size=20 ,mode=0600)
+share_ang_vel = sysv_ipc.SharedMemory( 21, flags=01000,size=20 ,mode=0600)
 b = degree_gyro_q_l.acc()
                 
 timecheck_list = []
@@ -32,7 +18,7 @@ while(True):
 	loop_time = timecheck_list[1] - timecheck_list[0]
 	timecheck_list.pop(0)
                       
-	#gyro_pitch_degree, _ = b.gyro_pitch(loop_time, gyro_pitch_degree)
+	gyro_pitch_degree, _ = b.gyro_pitch(loop_time, gyro_pitch_degree)
 	get_gyro_degree, p_ang_vel = b.gyro_pitch(loop_time, acc_gyro_pitch)
 			
 	degree_sign = np.sign(get_gyro_degree)
@@ -43,12 +29,10 @@ while(True):
 			acc_gyro_pitch = 0.97 * get_gyro_degree + 0.03 * acc_pitch_degree
 		else:
 			acc_gyro_pitch = degree_sign * ((0.97 * abs(get_gyro_degree)) + (0.03 * (360 - abs(acc_pitch_degree))))
-			acc_gyro_pitch = safeBoundary(acc_gyro_pitch)
+			#acc_gyro_pitch = safeBoundary(acc_gyro_pitch)
 
  
                         #acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
         #vari = share_acc_gyro_pitch.read()          
 	#print(vari)     
-	
 	share_acc_gyro_pitch.write(str(acc_gyro_pitch))
-	share_p_ang_vel.write(str(p_ang_vel))

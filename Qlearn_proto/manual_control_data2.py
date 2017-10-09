@@ -85,8 +85,8 @@ def main():
 		servo_pwm1 = pwm_1 + (int(period3) - 982) * 0.00049 
 		servo_pwm2 = pwm_2 + (int(period1) - 982) * 0.00049
 
-        	a.servo_1(servo_pwm1)
-        	a.servo_2(servo_pwm2)
+        	a.servo_1(1.3)
+        	a.servo_2(1.3)
 		
 		## for matplotlib ##
         	data_time = time.time() - start_time
@@ -101,7 +101,7 @@ def main():
 		
        		print "<time: %.16s> : degree= %.16s    \tpwm_1= %.5s pwm2= %.5s" % (data_time, acc_gyro_pitch, servo_pwm1, servo_pwm2)
 		#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s" % (servo_pwm1, servo_pwm2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree)	
-		pdb.set_trace() 
+		#pdb.set_trace() 
 		time.sleep(0.01)
 	
 if __name__ == '__main__':

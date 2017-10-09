@@ -5,7 +5,7 @@ import time
 
 ## Initialize
 count = 1
-pwm_1 = 1.1
+pwm_1 = 1.22
 pwm_2 = 1.22
 f = open("data.txt", 'w')
 
