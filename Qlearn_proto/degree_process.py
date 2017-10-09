@@ -16,6 +16,7 @@ def safeBoundary(value):
 
 share_acc_gyro_pitch = sysv_ipc.SharedMemory(600, flags=01000, size=20 ,mode=0600)
 share_p_ang_vel = sysv_ipc.SharedMemory(1024, flags=01000,size=20 ,mode=0600)
+share_acc_pitch_degree = sysv_ipc.SharedMemory(256, flags=01000,size=20 ,mode=0600)
 #share_acc_gyro_pitch = sysv_ipc.SharedMemory(1234, flags=0, size=20, mode=0600)
 #share_p_ang_vel = sysv_ipc.SharedMemory(12345, flags=0)
 
@@ -50,5 +51,6 @@ while(True):
         #vari = share_acc_gyro_pitch.read()          
 	#print(vari)     
 	
+	share_acc_pitch_degree.write(str(acc_pitch_degree))
 	share_acc_gyro_pitch.write(str(acc_gyro_pitch))
 	share_p_ang_vel.write(str(p_ang_vel))

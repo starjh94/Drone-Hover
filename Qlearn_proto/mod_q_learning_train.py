@@ -1,3 +1,6 @@
+import subprocess
+subprocess.Popen(["python","degree_process.py"])
+
 import Servo
 import numpy as np
 import degree_gyro_q_l
@@ -5,22 +8,21 @@ import threading
 import time
 
 import sysv_ipc
-import subprocess
 import tensorflow as tf
 import random
 import dqn
 from collections import deque
 
-subprocess.Popen(["python","degree_process.py"])
 ## Initialize - drone
 count = 1
 init_pwm_1 = 1.22
-init_pwm_2 = 1.15
+init_pwm_2 = 1.12
 l_plus_pwm = 0.37
 r_plus_pwm = 0.42
 start_time = 0
 memory_degree = sysv_ipc.SharedMemory(600)
 memory_ang_vel = sysv_ipc.SharedMemory(1024)
+memory_acc_degree = sysv_ipc.SharedMemory(256)
 
 ## Initialize - neural network
 input_size = 2    # (Degree, Angular Velocity)
@@ -92,22 +94,39 @@ def step_aciton(action, pwm, l_or_r):
 
 def step_action(action, pwm):
 	if action == 0:
-                return pwm - 0.0001
+                return pwm - 0.001
         elif action == 1:
                 return pwm
         else:
-        	return pwm + 0.0001
+        	return pwm + 0.001
 
 
 def reward_done_check(pre_degree, degree):
+	if degree > -1 and degree < 1:
+        	return +100, False
+	
+	else:
+		if abs(degree) >= abs(pre_degree):
+                	if abs(degree - pre_degree) < 0.5:
+                        	return +10, False
+                	else:
+				print "degree finish"
+                		return -100, True
+		else:
+			return 0, False
+	"""
 	if abs(degree) >= abs(pre_degree):
+		if abs(degree - pre_degree) < 0.5:
+			return +10, False
 		print "degree finish"
 		return -100, True
 	else:
 		if degree > -1 and degree < 1:
-			return +10, False
+			return +100, False
 		else:
 			return 0, False
+
+	"""
 ## Using threading Timer
 def every5sec() :
     	b = degree_gyro_q_l.acc()
@@ -140,7 +159,8 @@ def main() :
 	global start_time
 	global memory_degree
 	global memory_ang_vel    	
-
+	global memory_acc_degree	
+	
 	max_episodes = 2000
 	## store the previous observations in replay memory
 	left_replay_buffer = deque()
@@ -181,10 +201,12 @@ def main() :
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2			
 			
+			"""
 			degree = memory_degree.read()
 			acc_gyro_pitch = float(degree.rstrip('\x00'))
 			ang_vel = memory_ang_vel.read()	
 			p_ang_vel = float(ang_vel.rstrip('\x00'))
+			"""
 			"""
 			timecheck_list.append(time.time())
                 	loop_time = timecheck_list[1] - timecheck_list[0]
@@ -199,10 +221,18 @@ def main() :
 			"""	
 			state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 			"""
-			state = np.array([acc_gyro_pitch, p_ang_vel])
+			#state = np.array([acc_gyro_pitch, p_ang_vel])
 			print "\n\n"	
 			while not done:
-				print "\t\t\t<state> degree: %s, angular velocity: %s" %(state[0], state[1])
+				degree = memory_degree.read()
+                        	acc_gyro_pitch = float(degree.rstrip('\x00'))
+                        	ang_vel = memory_ang_vel.read() 
+                        	p_ang_vel = float(ang_vel.rstrip('\x00'))
+				acc_degree = memory_acc_degree.read()
+				acc_pitch = float(acc_degree.rstrip('\x00'))
+				state = np.array([acc_gyro_pitch, p_ang_vel])
+
+				print "\t\t\t<state> degree: %s vs A:%s, \tangular velocity: %s" %(state[0], acc_pitch, state[1])
 				if np.random.rand(1) < e:
 					action_left = np.random.randint(3)
 					action_right = np.random.randint(3)
@@ -216,7 +246,7 @@ def main() :
 				pwm_left = step_action(action_left, pwm_left) 
                                 pwm_right = step_action(action_right, pwm_right)
 				
-				print "\t\t\t<action-motor> left: %s, right: %s" % (pwm_left, pwm_right)
+				print "\t\t\t\t\t<action-motor> left: %s, right: %s" % (pwm_left, pwm_right)
 			
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)						
@@ -228,6 +258,8 @@ def main() :
                         	acc_gyro_pitch = float(degree.rstrip('\x00'))
                         	ang_vel = memory_ang_vel.read()
                         	p_ang_vel = float(ang_vel.rstrip('\x00'))
+				acc_degree = memory_acc_degree.read()
+                                acc_pitch = float(acc_degree.rstrip('\x00'))
 
 				"""
 				timecheck_list.append(time.time())
@@ -241,7 +273,6 @@ def main() :
                         	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))				
 				"""
 				next_state = np.array([acc_gyro_pitch, p_ang_vel])				
-                               	print "\t\t\t<finish state> degree: %s, angular velocity: %s" %(next_state[0], next_state[1])
 				
 				"""
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
@@ -259,27 +290,37 @@ def main() :
                                         right_replay_buffer.popleft()
 				"""	
 				if done: 
-                                        time.sleep(3)
+                                    	
+					"""
+					if step_count == 0:
+						print "\t\t\t<warm-up>"
+						done = False
+						pass
+					"""	
+				    
+                               		print "\t\t\t<finish state> degree: %s vs A: %s, \tangular velocity: %s" %(next_state[0], acc_pitch,next_state[1])
+					time.sleep(3)
 					
+					"""	
 					degree = memory_degree.read()
                         		acc_gyro_pitch = float(degree.rstrip('\x00'))
-                        		ang_vel = memory_ang_vel.read()
-                        		p_ang_vel = float(ang_vel.rstrip('\x00'))
-					
+                       			ang_vel = memory_ang_vel.read()
+                       			p_ang_vel = float(ang_vel.rstrip('\x00'))
 					"""
+					"""	
 					timecheck_list.append(time.time())
-                                	loop_time = timecheck_list[1] - timecheck_list[0]
-                                	timecheck_list.pop(0)
+                               		loop_time = timecheck_list[1] - timecheck_list[0]
+                               		timecheck_list.pop(0)
 
-                                	acc_pitch_degree = b.pitch()
+                           	  	acc_pitch_degree = b.pitch()
 
                                 	gyro_pitch_degree, _ = b.gyro_pitch(loop_time, gyro_pitch_degree)
                                 	get_gyro_degree, p_ang_vel = b.gyro_pitch(loop_time, acc_gyro_pitch)
                                 	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
 					"""
-					next_state = np.array([acc_gyro_pitch, p_ang_vel])
+					#next_state = np.array([acc_gyro_pitch, p_ang_vel])
 				
-				state = next_state
+				#state = next_state
 				step_count += 1
 				if step_count > 10000:
 					break
