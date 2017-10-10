@@ -1,5 +1,5 @@
 import subprocess
-subprocess.Popen(["python","degree_process.py"])
+subprocess.Popen(["python","degree_process2.py"])
 
 import Servo
 import numpy as np
@@ -20,11 +20,9 @@ init_pwm_2 = 1.12
 l_plus_pwm = 0.37
 r_plus_pwm = 0.42
 start_time = 0
-
 memory_degree = sysv_ipc.SharedMemory(600)
 memory_ang_vel = sysv_ipc.SharedMemory(1024)
 memory_acc_degree = sysv_ipc.SharedMemory(256)
-memory_semaphore = sysv_ipc.Semaphore(128)
 
 ## Initialize - neural network
 input_size = 2    # (Degree, Angular Velocity)
@@ -104,29 +102,18 @@ def step_action(action, pwm):
 
 
 def reward_done_check(pre_degree, degree):
-	if degree > -20 and degree < 20:
-        	return +1, False
+	if degree > -1 and degree < 1:
+        	return +100, False
 	
 	else:
-		if abs(degree - pre_degree) < 1.5:
-			return 0, False
-
-		else:
-			if abs(degree) >= abs(pre_degree):
-				print "degree finish"
-				return -100, True
-			else: 
-				return 0, False
-		"""
 		if abs(degree) >= abs(pre_degree):
                 	if abs(degree - pre_degree) < 0.5:
-                        	return 0, False
+                        	return +10, False
                 	else:
 				print "degree finish"
                 		return -100, True
 		else:
 			return 0, False
-		"""
 	"""
 	if abs(degree) >= abs(pre_degree):
 		if abs(degree - pre_degree) < 0.5:
@@ -173,8 +160,7 @@ def main() :
 	global memory_degree
 	global memory_ang_vel    	
 	global memory_acc_degree	
-	global memory_semaphore	
-
+	
 	max_episodes = 2000
 	## store the previous observations in replay memory
 	left_replay_buffer = deque()
@@ -239,21 +225,19 @@ def main() :
 			#state = np.array([acc_gyro_pitch, p_ang_vel])
 			print "\n\n"	
 			while not done:
-				memory_semaphore.acquire(10)
-#				print "get the degree from the other process"
+				print "get the degree from the other process"
 				degree = memory_degree.read()
-#				print "complementary : %s : %s" %(repr(degree), degree)
+				print "complementary : %s" %(degree)
                         	acc_gyro_pitch = float(degree.rstrip('\x00'))
-#	                       	print "complementary success!"
+                        	print "complementary success!"
 				ang_vel = memory_ang_vel.read()
-#				print "ang_vel : %s : %s" %(repr(ang_vel), ang_vel)
+				print "ang_vel : %s" %(repr(ang_vel))
                         	p_ang_vel = float(ang_vel.rstrip('\x00'))
-#				print "ang_vel success!"
+				print "ang_vel success!"
 				acc_degree = memory_acc_degree.read()
-#				print "acc_degree : %s : %s" %(repr(acc_degree), acc_degree)
+				print "acc_degree : %s" %(acc_degree)
 				acc_pitch = float(acc_degree.rstrip('\x00'))
-#				print "acc_degree success!"
-				memory_semaphore.release()
+				print "acc_degree success!"
 				state = np.array([acc_gyro_pitch, p_ang_vel])
 
 				print "\t\t\t<state> degree: %s vs A:%s, \tangular velocity: %s" %(state[0], acc_pitch, state[1])
@@ -286,21 +270,19 @@ def main() :
 				acc_degree = memory_acc_degree.read()
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
 				"""
-				memory_semaphore.acquire(10)
-#				print "get the degree from the other process"
+				print "get the degree from the other process"
                                 degree = memory_degree.read()
-#                               print "complementary : %s : %s" %(repr(degree), degree)
+                                print "complementary : %s" %(degree)
                                 acc_gyro_pitch = float(degree.rstrip('\x00'))
-#                               print "complementary success!"
-  	                        ang_vel = memory_ang_vel.read()
-#				print "ang_vel : %s : %s" %(repr(ang_vel), ang_vel)
+                                print "complementary success!"
+                                ang_vel = memory_ang_vel.read()
+				print "ang_vel : %s" %(repr(ang_vel))
                                 p_ang_vel = float(ang_vel.rstrip('\x00'))
-#                               print "ang_vel success!"
+                                print "ang_vel success!"
                                 acc_degree = memory_acc_degree.read()
-#                               print "acc_degree : %s : %s" %(repr(acc_degree), acc_degree)
+                                print "acc_degree : %s" %(acc_degree)
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
-#                               print "acc_degree success!"
-				memory_semaphore.release()
+                                print "acc_degree success!"
 				"""
 				timecheck_list.append(time.time())
                         	loop_time = timecheck_list[1] - timecheck_list[0]

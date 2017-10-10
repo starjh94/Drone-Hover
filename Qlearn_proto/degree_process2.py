@@ -3,8 +3,6 @@ import numpy as np
 import time
 import sysv_ipc
 
-np_degree_data = np.array([[0, 0, 0, 0]])
-
 def safeBoundary(value):
 	## <boundary value change> Degree -180 ~ +180 		
 	if (value > -180 and value < 180):
@@ -17,22 +15,23 @@ def safeBoundary(value):
 	return value 
 
 
-def main():
-	global np_degree_data
-	
-	share_acc_gyro_pitch = sysv_ipc.SharedMemory(600, flags=01000, size=20 ,mode=0600)
-	share_p_ang_vel = sysv_ipc.SharedMemory(1024, flags=01000,size=20 ,mode=0600)
-	share_acc_pitch_degree = sysv_ipc.SharedMemory(256, flags=01000,size=20 ,mode=0600)
-	smp1 = sysv_ipc.Semaphore(128, flags=01000, mode=0600,initial_value = 1)
-	#share_acc_gyro_pitch = sysv_ipc.SharedMemory(1234, flags=0, size=20, mode=0600)
-	#share_p_ang_vel = sysv_ipc.SharedMemory(12345, flags=0)
 
-	b = degree_gyro_q_l.acc()
+share_acc_gyro_pitch = sysv_ipc.SharedMemory(600, flags=01000, size=20 ,mode=0600)
+share_p_ang_vel = sysv_ipc.SharedMemory(1024, flags=01000,size=20 ,mode=0600)
+share_acc_pitch_degree = sysv_ipc.SharedMemory(256, flags=01000,size=20 ,mode=0600)
+smp1 = sysv_ipc.Semaphore(600)
+#share_acc_gyro_pitch = sysv_ipc.SharedMemory(1234, flags=0, size=20, mode=0600)
+#share_p_ang_vel = sysv_ipc.SharedMemory(12345, flags=0)
+
+b = degree_gyro_q_l.acc()
                 
-	timecheck_list = []
-	acc_gyro_pitch = gyro_pitch_degree = b.pitch()
-	np_degree_data = np.array([[0, acc_gyro_pitch, b.pitch(), gyro_pitch_degree]])
-	
+timecheck_list = []
+acc_gyro_pitch = gyro_pitch_degree = b.pitch()
+
+np_degree_data = np.array([[0, acc_gyro_pitch, b.pitch(), gyro_pitch_degree]])
+
+
+try:
 	start_time = time.time()
 	timecheck_list.append(start_time)
 	while(True):
@@ -53,23 +52,16 @@ def main():
 			else:
 				acc_gyro_pitch = degree_sign * ((0.97 * abs(get_gyro_degree)) + (0.03 * (360 - abs(acc_pitch_degree))))
 				acc_gyro_pitch = safeBoundary(acc_gyro_pitch)
-		
-		data_time = time.time() - start_time
-		np_degree_data = np.append(np_degree_data, [[data_time, acc_gyro_pitch, acc_pitch_degree, gyro_pitch_degree]], axis=0)
+	
+ 
                 		#acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
         	#vari = share_acc_gyro_pitch.read()          
 		#print(vari)     
-		
-		smp1.acquire(10)
-		#print acc_gyro_pitch
+	
 		share_acc_pitch_degree.write(str(acc_pitch_degree))
 		share_acc_gyro_pitch.write(str(acc_gyro_pitch))
 		share_p_ang_vel.write(str(p_ang_vel))
-		smp1.release()		
 
-if __name__ == '__main__':
-	try:
-		main()
-	except:
-		np.save('degree_Data', np_degree_data)
-		print "degree_Data.npy is Saved"
+except:
+	np.save('degree_Data', np_degree_data)
+	print "degree_Data.npy is Saved"
