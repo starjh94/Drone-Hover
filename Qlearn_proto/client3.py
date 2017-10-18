@@ -13,7 +13,8 @@ while(True):
 	vari = memory.read()
 	smp.release()
 	b = time.time()
-	print count,;print b-a ,; print vari
+	#print count,;print b-a ,; print vari
+	print vari
 	count = count +1
 	time.sleep(0.01)
 
