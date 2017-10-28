@@ -2,7 +2,7 @@ import sysv_ipc
 import time
 import subprocess 
 #proc = subprocess.Popen(["python","thread_test7.py"])
-subprocess.Popen(["python","thread_test11.py"])
+subprocess.Popen(["python","thread_test10.py"])
 time.sleep(3)
 memory = sysv_ipc.SharedMemory(600)
 smp = sysv_ipc.Semaphore(22)

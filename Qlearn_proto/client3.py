@@ -14,7 +14,7 @@ while(True):
 	smp.release()
 	b = time.time()
 	#print count,;print b-a ,; print vari
-	print vari
+	print repr(vari)
 	count = count +1
 	time.sleep(0.01)
 
