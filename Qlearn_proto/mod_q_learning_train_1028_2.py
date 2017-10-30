@@ -1,5 +1,5 @@
 import subprocess
-subprocess.Popen(["python","degree_process.py"])
+subprocess.Popen(["python","degree_process_2.py"])
 
 import Servo
 import numpy as np
@@ -110,24 +110,78 @@ def action_print(action):
 	else:
 		return "(Up, Up)"
 
+"""
+def reward_done_check(pre_degree, degree):
+        if degree[0] > -5 and degree[0] < 5:
+                return +1, False
 
+        else:
+                if abs(degree[0] - pre_degree[0]) < 0.5:
+                        return 0, False
+
+                else:
+                        if abs(degree[0]) >= abs(pre_degree[0]):
+                                if abs(degree[1]) < abs(pre_degree[1]) :
+                                        return 0, False
+                                else:
+                                        print "degree finish"
+                                        return -100, True
+                        else:
+                                return 0, False
+"""
+"""
 def reward_done_check(pre_degree, degree):
 	if degree[0] > -5 and degree[0] < 5:
-        	return +1, False
+        	return -abs(degree[0]), False
 	
 	else:
 		if abs(degree[0] - pre_degree[0]) < 0.5:
-			return 0, False
+			return -abs(degree[0]), False
 
 		else:
 			if abs(degree[0]) >= abs(pre_degree[0]):
 				if abs(degree[1]) < abs(pre_degree[1]) :
-					return 0, False
+					return -abs(degree[0]), False
 				else:
 					print "degree finish"
-					return -100, True
+					return -abs(degree[0]), True
 			else: 
-				return 0, False
+				return -abs(degree[0]), False
+"""
+
+"""
+def reward_done_check(pre_degree, degree):
+        if degree[0] > -5 and degree[0] < 5:
+                return -abs(degree[0]), False
+        
+        else:
+              	if abs(degree[0]) >= abs(pre_degree[0]):
+                	if abs(degree[1]) < abs(pre_degree[1]) :
+                                return -abs(degree[0]), False
+                        else:
+                                print "degree finish"
+                                return -abs(degree[0]), True
+                else: 
+                        return -abs(degree[0]), False
+"""
+def reward_done_check(pre_degree, degree):
+        if int(degree[0]) > -5 and int(degree[0]) < 5:
+                return -abs(int(degree[0])), False
+        
+        else:
+                if abs(int(degree[0])) > abs(int(pre_degree[0])):
+                        if abs(degree[1]) < abs(pre_degree[1]) :
+                                return -abs(int(degree[0])), False
+                        else:
+				if np.sign(degree[1]) * np.sign(degree[0]) == -1: 
+                                	return -abs(int(degree[0])), False
+				else:
+					print "degree finish"
+                                	return -abs(int(degree[0])), True
+                else: 
+                        return -abs(int(degree[0])), False
+
+
 ## Using threading Timer
 def every5sec() :
     	b = degree_gyro_q_l.acc()

@@ -62,9 +62,9 @@ def main():
 		
 		smp1.acquire(10)
 		#print acc_gyro_pitch
-		share_acc_pitch_degree.write(str("%0.1f" % acc_pitch_degree).ljust(19," "))
-		share_acc_gyro_pitch.write(str("%0.1f" % acc_gyro_pitch).ljust(19," "))
-		share_p_ang_vel.write(str("%0.1f" % p_ang_vel).ljust(19," "))
+		share_acc_pitch_degree.write(str("%0.2f" % acc_pitch_degree).ljust(19," "))
+		share_acc_gyro_pitch.write(str("%0.2f" % acc_gyro_pitch).ljust(19," "))
+		share_p_ang_vel.write(str("%0.2f" % p_ang_vel).ljust(19," "))
 		smp1.release()		
 
 if __name__ == '__main__':

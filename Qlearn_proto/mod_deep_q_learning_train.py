@@ -10,13 +10,13 @@ import time
 import sysv_ipc
 import tensorflow as tf
 import random
-import dqn
+import dqn_test as dqn
 from collections import deque
 
 ## Initialize - drone
 count = 1
-init_pwm_1 = 1.22
-init_pwm_2 = 1.12
+init_pwm_1 = 1.25
+init_pwm_2 = 1.15
 l_plus_pwm = 0.37
 r_plus_pwm = 0.42
 start_time = 0
@@ -27,7 +27,7 @@ memory_acc_degree = sysv_ipc.SharedMemory(256)
 memory_semaphore = sysv_ipc.Semaphore(128)
 
 ## Initialize - neural network
-input_size = 2    # (Degree, Angular Velocity)
+input_size = 4    # (Degree, Angular Velocity, PWM_Left, PWM_Right)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
 dis = 0.9
@@ -54,7 +54,7 @@ def replay_train(mainDQN, targetDQN, train_batch):
 		x_stack = np.vstack([x_stack, state])
 	
 	# Train our network using target and predicted Q values on each episode
-	return mainDQN.update(x_stack, y_stack)
+	return mainDQN.update(x_stack, y_stack, 0.7)
 
 def get_copy_var_ops(dest_scope_name="target", src_scope_name="main"):
 	# Copy variables src_scope to dest_scope
@@ -70,25 +70,25 @@ def get_copy_var_ops(dest_scope_name="target", src_scope_name="main"):
 
 
 
-def step_action(action, pwm_left, pwm_right):
+def step_action(action, pwm_left, pwm_right, var=0.001):
 	if action == 0:
-                return pwm_left - 0.001, pwm_right - 0.001
+                return pwm_left - var, pwm_right - var
         elif action == 1:
-                return pwm_left - 0.001, pwm_right
+                return pwm_left - var, pwm_right
         elif action == 2: 
-        	return pwm_left - 0.001, pwm_right + 0.001
+        	return pwm_left - var, pwm_right + var
 	elif action == 3:
-		return pwm_left, pwm_right - 0.001
+		return pwm_left, pwm_right - var
 	elif action == 4:
 		return pwm_left, pwm_right
 	elif action == 5:
-		return pwm_left, pwm_right + 0.001
+		return pwm_left, pwm_right + var
 	elif action == 6:
-		return pwm_left + 0.001, pwm_right - 0.001
+		return pwm_left + var, pwm_right - var
 	elif action == 7:
-		return pwm_left + 0.001, pwm_right
+		return pwm_left + var, pwm_right
 	else:
-		return pwm_left + 0.001, pwm_right + 0.001
+		return pwm_left + var, pwm_right + var
 
 def action_print(action):
         if action == 0:
@@ -110,24 +110,126 @@ def action_print(action):
 	else:
 		return "(Up, Up)"
 
+"""
+def reward_done_check(pre_degree, degree):
+        if degree[0] > -5 and degree[0] < 5:
+                return +1, False
 
+        else:
+                if abs(degree[0] - pre_degree[0]) < 0.5:
+                        return 0, False
+
+                else:
+                        if abs(degree[0]) >= abs(pre_degree[0]):
+                                if abs(degree[1]) < abs(pre_degree[1]) :
+                                        return 0, False
+                                else:
+                                        print "degree finish"
+                                        return -100, True
+                        else:
+                                return 0, False
+"""
+"""
 def reward_done_check(pre_degree, degree):
 	if degree[0] > -5 and degree[0] < 5:
-        	return +1, False
+        	return -abs(degree[0]), False
 	
 	else:
 		if abs(degree[0] - pre_degree[0]) < 0.5:
-			return 0, False
+			return -abs(degree[0]), False
 
 		else:
 			if abs(degree[0]) >= abs(pre_degree[0]):
 				if abs(degree[1]) < abs(pre_degree[1]) :
-					return 0, False
+					return -abs(degree[0]), False
+				else:
+					if np.sign(degree[1]) * np.sign(degree[0]) == -1:
+                                		print "!!"
+                                		return -abs(degree[0]), False
+					else:
+						print "degree finish"
+						return -abs(degree[0]), True
+			else: 
+				return -abs(degree[0]), False
+
+"""
+"""
+def reward_done_check(pre_degree, degree):
+        if degree[0] > -5 and degree[0] < 5:
+                return -abs(degree[0]), False
+        
+        else:
+              	if abs(degree[0]) >= abs(pre_degree[0]):
+                	if abs(degree[1]) < abs(pre_degree[1]) :
+                                return -abs(degree[0]), False
+                        else:
+                                print "degree finish"
+                                return -abs(degree[0]), True
+                else: 
+                        return -abs(degree[0]), False
+"""
+"""
+def reward_done_check(pre_degree, degree):
+        if int(degree[0]) > -5 and int(degree[0]) < 5:
+                return -abs(int(degree[0])), False
+        
+        else:
+                if abs(int(degree[0])) > abs(int(pre_degree[0])):
+                        if abs(degree[1]) < abs(pre_degree[1]) :
+                                return -abs(int(degree[0])), False
+                        else:
+				if np.sign(degree[1]) * np.sign(degree[0]) == -1: 
+                                	print "!!"
+					return -abs(int(degree[0])), False
 				else:
 					print "degree finish"
-					return -100, True
-			else: 
-				return 0, False
+                                	return -abs(int(degree[0])), True
+                else: 
+                        return -abs(int(degree[0])), False
+"""
+"""
+def reward_done_check(pre_degree, degree):
+	## motor PWM check 
+	if (degree[2] < 1.22 or degree[2] > 1.57) or (degree[3] < 1.12 or degree[3] > 1.52):
+		return -10000, True
+
+	## Degree & Angular velocity check
+	if abs(int(degree[0])) > abs(int(pre_degree[0])):
+        	if abs(degree[1]) < abs(pre_degree[1]) :
+                        return -abs(degree[0]), False
+                else:
+                        if np.sign(degree[1]) * np.sign(degree[0]) == -1: 
+                                return -abs(degree[0]), False
+                        else:
+                                print "degree finish"
+                                return -abs(degree[0]), True
+        else: 
+                return -abs(degree[0]), False
+"""
+def reward_done_check(pre_degree, degree):
+        ## motor PWM check 
+        if (degree[2] < 1.22 or degree[2] > 1.57) or (degree[3] < 1.12 or degree[3] > 1.52):
+                return -100, True
+
+        ## Degree & Angular velocity check
+	if degree[0] > -10 and degree[0] < 10:
+                return +1, False
+        
+        else:
+        	if abs(int(degree[0])) > abs(int(pre_degree[0])):
+                	if abs(degree[1]) < abs(pre_degree[1]) :
+                        	return 0, False
+                	else:
+                        	if np.sign(degree[1]) * np.sign(degree[0]) == -1: 
+                                	return 0, False
+                        	else:
+                                	print "degree finish"
+                                	return -100, True
+        	else: 
+                	return 0, False
+
+
+
 ## Using threading Timer
 def every5sec() :
     	b = degree_gyro_q_l.acc()
@@ -227,7 +329,7 @@ def main() :
 				acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				state = np.array([acc_gyro_pitch, p_ang_vel])
+				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
 				if np.random.rand(1) < e:
@@ -235,6 +337,7 @@ def main() :
 				else:
 					action = np.argmax(mainDQN.predict(state))
 				
+				print "Q: %s" % (mainDQN.predict(state))	
 				pwm_left, pwm_right = step_action(action, pwm_left, pwm_right) 
 				
 				print "\t\t\t\t\t\t\t\t\t\t<action-motor> left: %s, right: %s <= %s" % (pwm_left, pwm_right, action_print(action))
@@ -275,7 +378,7 @@ def main() :
                         	get_gyro_degree, p_ang_vel = b.gyro_pitch(loop_time, acc_gyro_pitch)
                         	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))				
 				"""
-				next_state = np.array([acc_gyro_pitch, p_ang_vel])				
+				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])				
 				
 				"""
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
@@ -297,7 +400,7 @@ def main() :
 						pass
 					"""	
 				    	
-                               		print "\t\t\t<finish state> degree: %s vs A: %s, \tangular velocity: %s" %(next_state[0], acc_pitch,next_state[1])
+                               		print "\t\t\t<finish state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])
 					time.sleep(3)
 					
 					"""	
@@ -328,7 +431,7 @@ def main() :
 			if step_count > 10000:
 				pass
 	
-			if len(replay_buffer) > 10 and episode % 10 == 1: # train every 10 episode
+			if len(replay_buffer) > 100 and episode % 10 == 1: # train every 10 episode
 				# Get a random batch of experiences.
 				for _ in range(50):
 					minibatch = random.sample(replay_buffer, 10)
