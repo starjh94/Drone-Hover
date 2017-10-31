@@ -3,7 +3,9 @@ import sys
 import glob
 
 model_load = False
+deque_load = False
 
+## Restore Model
 if len(sys.argv) == 2 :
 
         #if os.path.exists("./TF_Data/"+sys.argv[1]) is False :
@@ -14,6 +16,28 @@ if len(sys.argv) == 2 :
         else:
                 print "'%s' model will be restored!\n" %(sys.argv[1])
 		model_load = True
+
+## Restore Model & Deque
+elif len(sys.argv) == 3:
+	
+	if len(glob.glob("./TF_Data/"+sys.argv[1]+".*")) == 0:
+                print "'%s' is Not exist file\n" %(sys.argv[1])
+	else :
+        	model_load = True
+	
+	if os.path.exists("./Deque_Data/"+sys.argv[2]) is False:
+		print "'%s' is Not exist file\n" %(sys.argv[2]) 
+	else:
+		deque_load = True
+	
+	if not (model_load and deque_load):
+                print "usage: sudo python *.py  *.ckpt  *.txt"
+		exit()
+	else:  
+		print "'%s' model & '%s' deque will be restored!\n" %(sys.argv[1], sys.argv[2])
+
+
+## Enter Model name		
 while True:
         learning_model_name= raw_input("Model name for save(<ex> *.ckpt) : ")
 
@@ -25,7 +49,7 @@ while True:
                         same_name_answer = raw_input("\nThe file name already exists.\nDo you want to overwrite?(Y / N): ")
 
                         if same_name_answer.upper() == "Y":
-                                print "\nIt will be saved as '%s'" % (learning_model_name)
+                                print "\nIt will be overwrited as '%s'" % (learning_model_name)
                                 break
                         elif same_name_answer.upper() == "N":
                                 print "\nEnter the model name again"
@@ -37,6 +61,32 @@ while True:
                         break
         else:
                 print "\nIt will be saved as '%s'" % (learning_model_name)
+                break
+
+## Enter Deque name
+while True:
+        learning_deque_name= raw_input("Deque name for save(<ex> *.txt) : ")
+
+        if learning_deque_name[-4:] != ".txt":
+                print "\nPlease write correctly!"
+        elif os.path.exists("./Deque_Data/"+learning_deque_name) is True:
+
+                while True:
+                        same_deq_name_answer = raw_input("\nThe file name already exists.\nDo you want to overwrite?(Y / N): ")
+
+                        if same_deq_name_answer.upper() == "Y":
+                                print "\nIt will be overwrited as '%s'" % (learning_deque_name)
+                                break
+                        elif same_deq_name_answer.upper() == "N":
+                                print "\nEnter the deque name again"
+                                break
+                        else:
+                                print "\nPleas write correctly!"
+
+                if same_deq_name_answer.upper() == "Y":
+                        break
+        else:
+                print "\nIt will be saved as '%s'" % (learning_deque_name)
                 break
 
 
@@ -55,6 +105,7 @@ import tensorflow as tf
 import random
 import dqn_test as dqn
 from collections import deque
+import pickle
 
 ## Initialize - drone
 count = 1
@@ -309,10 +360,17 @@ def main() :
 	global memory_semaphore	
 	global sess	
 	global model_load	
+	global deque_load
+	global replay_buffer	
 
 	max_episodes = 2000
 	## store the previous observations in replay memory
-	replay_buffer = deque()
+	if not deque_load:
+		replay_buffer = deque()
+	else:
+		f = open("./Deque_Data/"+sys.argv[2], 'r')
+		replay_buffer = pickle.load(f)
+		f.close()
 
 	que = []
 	acc_que = []
@@ -447,6 +505,13 @@ if __name__ == '__main__':
 		# Save model 
 		saver = tf.train.Saver()
 		save_path = saver.save(sess, "./TF_Data/"+learning_model_name)
-		
+		print "\n<Model is saved>"
+				
+		# Save deque
+		f = open("./Deque_Data/"+learning_deque_name, 'w')
+		pickle.dump(replay_buffer, f)
+		f.close()			
+		print "<Deque is saved>"		
+
 		#np.save('M_L_Data', np_ML_data)
 		#print "time: %s, number of numpy data: %s" % (time.time() - start_time, len(np_ML_data))
