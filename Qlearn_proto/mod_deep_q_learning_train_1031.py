@@ -371,6 +371,7 @@ def main() :
 		f = open("./Deque_Data/"+sys.argv[2], 'r')
 		replay_buffer = pickle.load(f)
 		f.close()
+		print "'%s' deque is loaded" % (sys.argv[2])		
 
 	que = []
 	acc_que = []
@@ -395,7 +396,7 @@ def main() :
 		else:
 			saver = tf.train.Saver()
 			saver.restore(sess, "./TF_Data/"+sys.argv[1]) 	
-			print "'%s' model loaded" % (sys.argv[1])			
+			print "'%s' model is loaded" % (sys.argv[1])			
 
 		## initial copy q_net -> target_net
 		copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
