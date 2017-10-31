@@ -1,5 +1,8 @@
 import os
 import sys
+import glob
+
+print len(glob.glob("./TF_Data/"+sys.argv[1]+".*")) 
 
 if len(sys.argv) == 2 :
 

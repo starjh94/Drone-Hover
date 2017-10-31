@@ -1,13 +1,19 @@
 import os
 import sys
+import glob
+
+model_load = False
 
 if len(sys.argv) == 2 :
 
-        if os.path.exists("./TF_Data/"+sys.argv[1]) is False :
-                print "'%s' is Not exist file\n" %(sys.argv[1])
-                exit()
+        #if os.path.exists("./TF_Data/"+sys.argv[1]) is False :
+	if len(glob.glob("./TF_Data/"+sys.argv[1]+".*")) == 0:       
+		print "'%s' is Not exist file\n" %(sys.argv[1])
+                print "usage: sudo python *.py *.ckpt"
+		exit()
         else:
                 print "'%s' model will be restored!\n" %(sys.argv[1])
+		model_load = True
 while True:
         learning_model_name= raw_input("Model name for save(<ex> *.ckpt) : ")
 
@@ -302,6 +308,7 @@ def main() :
 	global memory_acc_degree	
 	global memory_semaphore	
 	global sess	
+	global model_load	
 
 	max_episodes = 2000
 	## store the previous observations in replay memory
@@ -325,7 +332,12 @@ def main() :
 	#with tf.Session() as sess:
 		mainDQN = dqn.DQN(sess, input_size, output_size, name="main")
 		targetDQN = dqn.DQN(sess, input_size, output_size, name="target")
-		tf.global_variables_initializer().run(session=sess)
+		if not model_load:
+			tf.global_variables_initializer().run(session=sess)
+		else:
+			saver = tf.train.Saver()
+			saver.restore(sess, "./TF_Data/"+sys.argv[1]) 	
+			print "'%s' model loaded" % (sys.argv[1])			
 
 		## initial copy q_net -> target_net
 		copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
