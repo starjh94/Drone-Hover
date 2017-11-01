@@ -55,8 +55,9 @@ class DQN:
 			layer4 = tf.nn.dropout(layer4, keep_prob= self.keep_prob)
 
             		# Fifth layer of weights
-            		W5 = tf.get_variable("W5", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
-            	
+            		W5 = tf.get_variable("W5", shape=[h_size, self.output_size], initializer=tf.contrib.layers.xavier_initializer())
+            		
+			"""	
 			#layer5 = tf.nn.relu(tf.matmul(layer4, W5))
 			layer5 = self.leaky_relu(tf.matmul(layer4, W5), 0.1)
 			layer5 = tf.nn.dropout(layer5, keep_prob= self.keep_prob)
@@ -91,9 +92,9 @@ class DQN:
 
 			# Tenth 
 			W10 = tf.get_variable("W10", shape=[h_size, self.output_size], initializer=tf.contrib.layers.xavier_initializer())
-	
+			"""
 			# Q prediction
-            		self._Qpred = tf.matmul(layer9, W10)
+            		self._Qpred = tf.matmul(layer4, W5)
             
         	# We need to define the parts of the network needed for learning a policy
         	self._Y = tf.placeholder(shape=[None, self.output_size], dtype=tf.float32)

@@ -43,7 +43,8 @@ while True:
 
         if learning_model_name[-5:] != ".ckpt":
                 print "\nPlease write correctly!"
-        elif os.path.exists("./TF_Data/"+learning_model_name) is True:
+        #elif os.path.exists("./TF_Data/"+learning_model_name) is True:
+	elif len(glob.glob("./TF_Data/"+learning_model_name+".*")) > 0:
 
                 while True:
                         same_name_answer = raw_input("\nThe file name already exists.\nDo you want to overwrite?(Y / N): ")
@@ -137,13 +138,15 @@ def replay_train(mainDQN, targetDQN, train_batch):
 	# Get stored information from the buffer
 	for state, action, reward, next_state, done in train_batch:
 		Q = mainDQN.predict(state)
-
+		
+		Q[0, action] = reward + dis * np.max(targetDQN.predict(next_state))
+		"""
 		# terminal?
 		if done:
 			Q[0, action] = reward
 		else:
 			Q[0, action] = reward + dis * np.max(targetDQN.predict(next_state))
-		
+		"""
 		y_stack = np.vstack([y_stack, Q])
 		x_stack = np.vstack([x_stack, state])
 	
@@ -164,7 +167,7 @@ def get_copy_var_ops(dest_scope_name="target", src_scope_name="main"):
 
 
 
-def step_action(action, pwm_left, pwm_right, var=0.001):
+def step_action(action, pwm_left, pwm_right, var=0.0005):
 	if action == 0:
                 return pwm_left - var, pwm_right - var
         elif action == 1:
@@ -300,13 +303,15 @@ def reward_done_check(pre_degree, degree):
         else: 
                 return -abs(degree[0]), False
 """
+"""
+## ****** ##
 def reward_done_check(pre_degree, degree):
         ## motor PWM check 
         if (degree[2] < 1.22 or degree[2] > 1.57) or (degree[3] < 1.12 or degree[3] > 1.52):
                 return -100, True
 
         ## Degree & Angular velocity check
-	if degree[0] > -15 and degree[0] < 15:		# objective( 0 degree ) +,- 15 degree
+	if degree[0] > -10 and degree[0] < 10:		# objective( 0 degree ) +,- 5 degree
                 return +1, False
         
         else:
@@ -321,6 +326,25 @@ def reward_done_check(pre_degree, degree):
                                 	return -100, True
         	else: 								# <absolute> Degree ( now < past )
                 	return 0, False
+"""
+
+def reward_done_check(pre_degree, degree):
+        ## motor PWM check 
+        if (degree[2] < 1.22 or degree[2] > 1.57) or (degree[3] < 1.12 or degree[3] > 1.52):
+                return -200, True
+
+        if abs(int(degree[0])) > abs(int(pre_degree[0])):               # <absolute> Degree ( now > past ) 
+        	if abs(degree[1]) < abs(pre_degree[1]):         # <absolute> Angular velocity ( now < past )
+                        return 1/(abs(degree[0])+0.01), False
+                else:                                           # <absolute>  Angular velocity ( now > past )
+                        if np.sign(degree[1]) * np.sign(degree[0]) == -1:       # Sign of the current angle and Sign of the angular velocity are different
+                                return 1/(abs(degree[0])+0.01), False
+                        else:                                                   # Same sign
+                                print "degree finish"
+                                return 1/(abs(degree[0])+0.01), True
+        else:                                                           # <absolute> Degree ( now < past )
+                return 1/(abs(degree[0])+0.01), False
+
 
 
 
@@ -345,6 +369,38 @@ def every1sec() :
 	#print "\n\n\n\n\n\n\n\n\n!!!!!!!!!!!!!!!!!!!!! 1sec over !!!!!!!!!!!!!!!!!!!!!\n"
 
 	threading.Timer(1, every1sec).start()
+
+def drone_play(mainDQN) :
+        global init_pwm_1
+        global init_pwm_2
+
+        a = Servo.servo()
+        pwm_left = init_pwm_1
+        pwm_right = init_pwm_2
+
+        while True:
+                memory_semaphore.acquire(10)
+                degree = memory_degree.read()
+                acc_gyro_pitch = float(degree.rstrip('\x00'))
+                ang_vel = memory_ang_vel.read()
+                p_ang_vel = float(ang_vel.rstrip('\x00'))
+                acc_degree = memory_acc_degree.read()
+                acc_pitch = float(acc_degree.rstrip('\x00'))
+
+                memory_semaphore.release()
+                state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
+
+                print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
+                action = np.argmax(mainDQN.predict(state))
+
+                pwm_left, pwm_right = step_action(action, pwm_left, pwm_right)
+
+                print "\t\t\t\t\t\t\t\t\t\t<action-motor> left: %s, right: %s <= %s" % (pwm_left, pwm_right, action_print(action))
+
+                a.servo_1(pwm_left)
+                a.servo_2(pwm_right)
+
+                time.sleep(0.01)
 
 def main() :
 	a = Servo.servo()
@@ -401,7 +457,9 @@ def main() :
 		## initial copy q_net -> target_net
 		copy_ops = get_copy_var_ops(dest_scope_name="target", src_scope_name="main")
 		sess.run(copy_ops)
-
+		
+		#drone_play(mainDQN)
+		
 		for episode in range(max_episodes):
 			print "new episodes initializaion"
 			e = 1. / ((episode / 10) + 1) 
@@ -425,21 +483,21 @@ def main() :
 				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
+				
 				if np.random.rand(1) < e:
 					action = np.random.randint(9)
 				else:
 					action = np.argmax(mainDQN.predict(state))
-				
+			
 				print "Q: %s" % (mainDQN.predict(state))	
 				pwm_left, pwm_right = step_action(action, pwm_left, pwm_right) 
 				
 				print "\t\t\t\t\t\t\t\t\t\t<action-motor> left: %s, right: %s <= %s" % (pwm_left, pwm_right, action_print(action))
-			
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)						
 			
-				time.sleep(0.01)
-				
+				time.sleep(0.1)
+			
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
                                 
@@ -453,7 +511,7 @@ def main() :
 				memory_semaphore.release()
 				
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])				
-				
+			 
 				reward, done = reward_done_check(state, next_state)		
 			
 		

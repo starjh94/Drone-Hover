@@ -1,0 +1,2 @@
+model_checkpoint_path: "layer_5_time_03_pwmvar_0001.ckpt"
+all_model_checkpoint_paths: "layer_5_time_03_pwmvar_0001.ckpt"
