@@ -7,11 +7,13 @@ import degree_gyro_q_l
 import threading
 import time
 
+import copy
 import sysv_ipc
 import tensorflow as tf
 import random
 import REINFORCE
 
+import pdb
 ## Initialize - drone
 count = 1
 init_pwm_1 = 1.25
@@ -22,7 +24,7 @@ r_plus_pwm = 0.42
 
 start_time = 0
 
-done = False
+done_episode = False
 
 memory_degree = sysv_ipc.SharedMemory(600)
 memory_ang_vel = sysv_ipc.SharedMemory(1024)
@@ -108,13 +110,14 @@ def reward_done_check(pre_degree, degree):
 """
 
 def reward_check(degree):
-	if degree >-1 and degree <1:
+	if degree[0] >-1 and degree[0] <1:
 		return +1
 	else:
-		return -abs(degree)
+		return -abs(degree[0])
 
 def done_timer():
-	done = True
+	global done_episode
+	done_episode = True
 
 ## Using threading Timer
 def every5sec() :
@@ -185,31 +188,32 @@ def main():
 	global memory_semaphore	
 	global sess	
 	global model_load
-	global done	
+	global done_episode	
 
 	max_episodes = 2000
-	
+		
 	pwm_1 = init_pwm_1
 	pwm_2 = init_pwm_2
 
 	scores, episodes = [], []
 	
-	init = tf.global_variables_initializer()	
+	#init = tf.global_variables_initializer()	
 	sess = tf.Session()
 	if True:
 		agent = REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
-		init.run(session=sess)
+		tf.global_variables_initializer().run(session=sess)
 
 		for episode in range(max_episodes):
 
 			print "new episodes initializaion"
 			done = False
-            		score = 0
+            		done_episode = False
+			score = 0
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			#timer = threading.Timer(10, done_timer).start()
+			timer = threading.Timer(10, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -224,12 +228,14 @@ def main():
 				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 				
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
-				print state	
+				#state = np.reshape(state, [1, 4])
+
 				action = agent.predict(state)
+				
 				pwm_left, pwm_right = step_action(action, pwm_left, pwm_right)
 				pwm_left, pwm_right = safe_pwm(pwm_left, pwm_right)
 				
-				print "\t\t\t\t\t\t\t\t\t\t<action-motor> left: %s, right: %s <= %s" % (pwm_left, pwm_right, action_print(action))
+				print "\t\t\t\t\t\t\t\t<action-motor> left: %s, right: %s <= %s" % (pwm_left, pwm_right, action_print(action))
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
@@ -237,8 +243,8 @@ def main():
 				
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
-                                
 				degree = memory_degree.read()
+                                
                                 acc_gyro_pitch = float(degree.rstrip('\x00'))
   	                        ang_vel = memory_ang_vel.read()
                                 p_ang_vel = float(ang_vel.rstrip('\x00'))
@@ -246,24 +252,26 @@ def main():
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 			
-				reward = reward_check(state)
-
-				agent.append_sample(state, action, reward)
+				reward = reward_check(next_state)
+				if done_episode == True:
+					done = done_episode
 				
+				agent.append_sample(state, action, reward)
 				score += reward
 				state = copy.deepcopy(next_state)
 
 				if done:
-					scores.append(score)
-                    			episodes.append(e)
-                    			score = round(score, 2)
-                    			print "episode: %s // loss: %s  score: %s  time_step: %s" %(e, loss, score, global_step)
-				
-		#			timer.cancel()
+					loss = agent.update(keep_prob=0.7)
 
+					scores.append(score)
+                    			episodes.append(episode)
+                    			score = round(score, 2)
+                    			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
+					time.sleep(3)
+					#pdb.set_trace()
+			
 if __name__ == '__main__':
     	try :
 		main()

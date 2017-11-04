@@ -1,4 +1,6 @@
 import tensorflow as tf
+
+import pdb
 import numpy as np
 
 class REINFORCEAgnet:
@@ -40,7 +42,7 @@ class REINFORCEAgnet:
 			
 			# Fourth layer of weights
             		W4 = tf.get_variable("W4", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
-            
+            		
             		layer4 = tf.nn.relu(tf.matmul(layer3, W4))
 			layer4 = tf.nn.dropout(layer4, keep_prob= self.keep_prob)
 			
@@ -54,16 +56,14 @@ class REINFORCEAgnet:
 		
 		self._action_prob = tf.reduce_sum(self._action * self._Pgradient, 1)
 		self._cross_entropy = tf.log(self._action_prob) * self._discounted_rewards
-		self._loss = -np.sum(self._cross_entropy)
+		self._loss = -tf.reduce_sum(self._cross_entropy)
 
         	self._train = tf.train.AdamOptimizer(learning_rate=l_rate).minimize(self._loss)
 
     	
-	def predict(self, state):
+	def predict(self, state, keep_prob=1):
 		state = np.reshape(state, [1, self.state_size])
-		print "111"
-		policy = self.session.run(self._Pgradient, feed_dict={self._X: state})[0]
-		print "222"
+		policy = self.session.run(self._Pgradient, feed_dict={self._X: state, self.keep_prob: keep_prob})[0]
 		return np.random.choice(self.action_size, 1, p=policy)[0]
     
     	def discount_rewards(self, rewards):
@@ -75,7 +75,7 @@ class REINFORCEAgnet:
         	return discounted_rewards
     
     	def append_sample(self, state, action, reward):
-        	self.states.append(state[0])
+        	self.states.append(state)
         	self.rewards.append(reward)
         	act = np.zeros(self.action_size)
         	act[action] = 1
@@ -85,7 +85,7 @@ class REINFORCEAgnet:
         	discounted_rewards = np.float32(self.discount_rewards(self.rewards))
         	discounted_rewards -= np.mean(discounted_rewards)
         	discounted_rewards /= np.std(discounted_rewards)
-        
+		
         	loss, _ = self.session.run([self._loss, self._train], feed_dict = {self._X: self.states, self._action: self.actions, self._discounted_rewards: discounted_rewards, self.keep_prob: keep_prob})
         	self.states, self.actions, self.rewards = [], [], []
         	return loss
