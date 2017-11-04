@@ -18,38 +18,39 @@ class REINFORCEAgnet:
     	def leaky_relu(self, x, alpha):
                 return tf.nn.relu(x) - alpha * tf.nn.relu(-x)
             
-    	def _build_network(self, h_size=24, l_rate=1e-3):
+    	def _build_network(self, h_size=24, l_rate=1e-4):
 		with tf.variable_scope(self.name):
             		self._X = tf.placeholder(tf.float32, [None, self.state_size], name="input_x")
 			
 			# First layer of weights
             		W1 = tf.get_variable("W1", shape=[self.state_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 			
-           		layer1 = tf.nn.relu(tf.matmul(self._X, W1))
+           		layer1 = tf.nn.tanh(tf.matmul(self._X, W1))
 			layer1 = tf.nn.dropout(layer1, keep_prob= self.keep_prob) 
 			
 			# Second layer of weights
             		W2 = tf.get_variable("W2", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
-            		
-			layer2 = tf.nn.relu(tf.matmul(layer1, W2))
+
+			layer2 = tf.nn.tanh(tf.matmul(layer1, W2))
             		layer2 = tf.nn.dropout(layer2, keep_prob= self.keep_prob)
 			
 			# Third layer of weights
             		W3 = tf.get_variable("W3", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
-           	 	
-			layer3 = tf.nn.relu(tf.matmul(layer2, W3))
+
+			layer3 = tf.nn.tanh(tf.matmul(layer2, W3))
 			layer3 = tf.nn.dropout(layer3, keep_prob= self.keep_prob)
 			
 			# Fourth layer of weights
             		W4 = tf.get_variable("W4", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
-            		
-            		layer4 = tf.nn.relu(tf.matmul(layer3, W4))
+	
+            		layer4 = tf.nn.tanh(tf.matmul(layer3, W4))
 			layer4 = tf.nn.dropout(layer4, keep_prob= self.keep_prob)
 			
 			# Fifth layer of weights
             		W5 = tf.get_variable("W5", shape=[h_size, self.action_size], initializer=tf.contrib.layers.xavier_initializer())
-            		
+
 			self._Pgradient = tf.nn.softmax(tf.matmul(layer4, W5))
+
         	
 		self._action = tf.placeholder(tf.float32, shape=[None, self.action_size])
         	self._discounted_rewards = tf.placeholder(tf.float32, shape=[None,])

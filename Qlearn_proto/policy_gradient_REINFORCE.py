@@ -1,3 +1,48 @@
+import os
+import sys
+import glob
+
+model_load = False
+
+## Restore Model
+if len(sys.argv) == 2 :
+
+        #if os.path.exists("./TF_Data/"+sys.argv[1]) is False :
+	if len(glob.glob("./TF_Data/"+sys.argv[1]+".*")) == 0:       
+		print "'%s' is Not exist file\n" %(sys.argv[1])
+                print "usage: sudo python *.py *.ckpt"
+		exit()
+        else:
+                print "'%s' model will be restored!\n" %(sys.argv[1])
+		model_load = True
+
+## Enter Model name		
+while True:
+        learning_model_name= raw_input("Model name for save(<ex> *.ckpt) : ")
+
+        if learning_model_name[-5:] != ".ckpt":
+                print "\nPlease write correctly!"
+        #elif os.path.exists("./TF_Data/"+learning_model_name) is True:
+	elif len(glob.glob("./TF_Data/"+learning_model_name+".*")) > 0:
+
+                while True:
+                        same_name_answer = raw_input("\nThe file name already exists.\nDo you want to overwrite?(Y / N): ")
+
+                        if same_name_answer.upper() == "Y":
+                                print "\nIt will be overwrited as '%s'" % (learning_model_name)
+                                break
+                        elif same_name_answer.upper() == "N":
+                                print "\nEnter the model name again"
+                                break
+                        else:
+                                print "\nPleas write correctly!"
+
+                if same_name_answer.upper() == "Y":
+                        break
+        else:
+                print "\nIt will be saved as '%s'" % (learning_model_name)
+                break
+
 import subprocess
 subprocess.Popen(["python","degree_process.py"])
 
@@ -13,6 +58,7 @@ import tensorflow as tf
 import random
 import REINFORCE
 
+import pylab
 import pdb
 ## Initialize - drone
 count = 1
@@ -34,6 +80,9 @@ memory_semaphore = sysv_ipc.Semaphore(128)
 ## Initialize - neural network
 input_size = 4    # (Degree, Angular Velocity, PWM_Left, PWM_Right)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
+
+## for pylab
+scores, episodes = [], []
 
 def step_action(action, pwm_left, pwm_right, var=0.001):
 	if action == 0:
@@ -110,10 +159,28 @@ def reward_done_check(pre_degree, degree):
 """
 
 def reward_check(degree):
-	if degree[0] >-1 and degree[0] <1:
-		return +1
+	if degree[0] > -5 and degree[0] <+5:
+		return +100
 	else:
 		return -abs(degree[0])
+
+"""
+def reward_check(pre_degree, degree):
+	if degree[0] > -1 and degree[0] <1:
+		return +1        
+
+	if abs(int(degree[0])) > abs(int(pre_degree[0])):               # <absolute> Degree ( now > past ) 
+                if abs(degree[1]) < abs(pre_degree[1]):         # <absolute> Angular velocity ( now < past )
+                        return 0
+                else:                                           # <absolute>  Angular velocity ( now > past )
+                        if np.sign(degree[1]) * np.sign(degree[0]) == -1:       # Sign of the current angle and Sign of the angular velocity are different
+                                return 0
+                        else:                                                   # Same sign
+                                print "degree finish"
+                                return -1
+        else:                                                           # <absolute> Degree ( now < past )
+                return 0
+"""
 
 def done_timer():
 	global done_episode
@@ -188,20 +255,27 @@ def main():
 	global memory_semaphore	
 	global sess	
 	global model_load
-	global done_episode	
+	global done_episode
+	global scores
+	global episodes	
 
 	max_episodes = 2000
 		
 	pwm_1 = init_pwm_1
 	pwm_2 = init_pwm_2
 
-	scores, episodes = [], []
 	
 	#init = tf.global_variables_initializer()	
 	sess = tf.Session()
 	if True:
+		pdb.set_trace()
 		agent = REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
-		tf.global_variables_initializer().run(session=sess)
+		if not model_load:
+			tf.global_variables_initializer().run(session=sess)
+		else:
+			saver = tf.train.Saver()
+			saver.restore(sess, "./TF_Data/"+sys.argv[1]) 	
+			print "'%s' model is loaded" % (sys.argv[1])	
 
 		for episode in range(max_episodes):
 
@@ -255,6 +329,7 @@ def main():
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 			
 				reward = reward_check(next_state)
+				#reward = reward_check(state, next_state)
 				if done_episode == True:
 					done = done_episode
 				
@@ -270,16 +345,21 @@ def main():
                     			score = round(score, 2)
                     			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
 					time.sleep(3)
-					#pdb.set_trace()
 			
 if __name__ == '__main__':
     	try :
 		main()
 	except :
 		print("finish")
-		"""
+		
+		# Save Graph
+		pylab.plot(episodes, scores, 'b')
+                pylab.savefig("./Learning_Img/reinforece.png")
+		print "\n<Learning Image Data is saved>"		
+
 		# Save model 
 		saver = tf.train.Saver()
 		save_path = saver.save(sess, "./TF_Data/"+learning_model_name)
 		print "\n<Model is saved>"
-		"""		
+		
+				

@@ -21,7 +21,7 @@ subprocess.Popen(["python","degree_process.py"])
 time.sleep(5)
 memory = sysv_ipc.SharedMemory(600)
 smp = sysv_ipc.Semaphore(128)
-PORT = 56792		
+PORT = 56796
 BUFSIZE = 1024
 HOST = ''
 ADDR = (HOST, PORT)
