@@ -13,9 +13,15 @@ from Msg_util import MsgUtil
 from threading import Thread
 from time import ctime
 from SocketServer import ThreadingMixIn
-
-
-PORT = 56793
+import sysv_ipc
+import time
+import subprocess
+#proc = subprocess.Popen(["python","thread_test7.py"])
+subprocess.Popen(["python","degree_process.py"])
+time.sleep(5)
+memory = sysv_ipc.SharedMemory(600)
+smp = sysv_ipc.Semaphore(128)
+PORT = 56792		
 BUFSIZE = 1024
 HOST = ''
 ADDR = (HOST, PORT)
@@ -43,8 +49,10 @@ while True:
     sendData.Body = send_data(None)
     sendData.Header.MSGTYPE = Msg.DATA_SEND
     sendData.Header.BODYLEN = sendData.Body.GetSize()
-    sendData.Body.acc_gyro = acc_gyro
-    sendData.Body.acc_pitch =40.1
-    sendData.Body.p_ang_vel =40.1
-    acc_gyro = acc_gyro + 5
+    smp.acquire(10)
+    vari = memory.read()
+    smp.release()
+    data = float(vari.rstrip('\x00'))
+    print data
+    sendData.Body.acc_gyro =data
     MsgUtil.send(ClientSocket, sendData)

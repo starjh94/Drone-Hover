@@ -1,5 +1,5 @@
 import subprocess
-subprocess.Popen(["python","degree_process.py"])
+#subprocess.Popen(["python","degree_process.py"])
 
 import Servo
 import numpy as np

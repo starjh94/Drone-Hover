@@ -1,24 +1,21 @@
 import struct
 class send_data:
     def __init__(self,buffer):
-        self.struct_fmt  =str.format('3f')
+        self.struct_fmt  =str.format('f')
         self.struct_len = struct.calcsize(self.struct_fmt)
-        print buffer
 
         if buffer != None:
             unpacked = struct.unpack(self.struct_fmt, buffer)
 
 
             self.acc_gyro = unpacked[0]
-            self.acc_pitch= unpacked[1]
-            self.p_ang_vel = unpacked[2]
+
 
     def GetBytes(self):
-            return struct.pack(self.struct_fmt,self.acc_gyro,self.acc_pitch,self.p_ang_vel )
+            return struct.pack(self.struct_fmt,self.acc_gyro)
 
     def GetSize(self):
         return self.struct_len
-
 class PemResponse:
     def __init__(self,buffer,size):
         self.struct_fmt  =str.format('{0}s2I',size)

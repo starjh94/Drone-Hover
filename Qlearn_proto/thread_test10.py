@@ -54,7 +54,6 @@ while(True):
         #vari = share_acc_gyro_pitch.read()          
 	#print(vari)     
 	smp1.acquire(10)
-	print acc_gyro_pitch
 	share_acc_gyro_pitch.write(str(acc_gyro_pitch))
 	#print "11"
 	smp1.release()
