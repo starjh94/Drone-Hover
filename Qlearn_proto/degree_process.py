@@ -72,4 +72,4 @@ if __name__ == '__main__':
 		main()
 	except:
 		np.save('degree_Data', np_degree_data)
-		print "degree_Data.npy is Saved"
+		print "\n<degree_Data.npy is saved>"

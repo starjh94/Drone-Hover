@@ -12,7 +12,11 @@ if len(sys.argv) == 2 :
 		print "'%s' is Not exist file\n" %(sys.argv[1])
                 print "usage: sudo python *.py *.ckpt"
 		exit()
+	elif sys.argv[1][-5:] != ".ckpt":
+                print "\nPlease write correctly!"
+		print "usage: sudo python *.py *.ckpt"
         else:
+		
                 print "'%s' model will be restored!\n" %(sys.argv[1])
 		model_load = True
 
@@ -58,6 +62,7 @@ import tensorflow as tf
 import random
 import REINFORCE
 
+import matplotlib.pyplot
 import pylab
 import pdb
 ## Initialize - drone
@@ -82,7 +87,7 @@ input_size = 4    # (Degree, Angular Velocity, PWM_Left, PWM_Right)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
 ## for pylab
-scores, episodes = [], []
+np_PG_data = np.array([[0, 0, 0]])
 
 def step_action(action, pwm_left, pwm_right, var=0.001):
 	if action == 0:
@@ -159,10 +164,27 @@ def reward_done_check(pre_degree, degree):
 """
 
 def reward_check(degree):
-	if degree[0] > -5 and degree[0] <+5:
-		return +100
-	else:
-		return -abs(degree[0])
+        if degree[0] > -10 and degree[0] <+10:
+		if degree[1] > - 20 and degree[1] < +20:
+			return +110
+		else:
+			return +100  
+                
+	elif degree[0] < -170 and degree[0] > +170:
+		return -100 
+        else:
+                return  -0.1
+
+"""
+## main ##
+def reward_check(degree):
+        if degree[0] > -10 and degree[0] <+10:
+                return +100 
+        elif degree[0] < -170 and degree[0] > +170:
+                return -100 
+        else:
+                return -0.1 
+"""
 
 """
 def reward_check(pre_degree, degree):
@@ -256,8 +278,8 @@ def main():
 	global sess	
 	global model_load
 	global done_episode
-	global scores
-	global episodes	
+	global np_PG_data
+
 
 	max_episodes = 2000
 		
@@ -268,7 +290,7 @@ def main():
 	#init = tf.global_variables_initializer()	
 	sess = tf.Session()
 	if True:
-		pdb.set_trace()
+		#pdb.set_trace()
 		agent = REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
 		if not model_load:
 			tf.global_variables_initializer().run(session=sess)
@@ -287,7 +309,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(10, done_timer).start()
+			timer = threading.Timer(3, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -313,7 +335,7 @@ def main():
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
-				time.sleep(0.2)
+				time.sleep(0.05)
 				
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
@@ -327,7 +349,7 @@ def main():
 				
 				memory_semaphore.release()
 				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
-			
+				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
 				reward = reward_check(next_state)
 				#reward = reward_check(state, next_state)
 				if done_episode == True:
@@ -339,9 +361,10 @@ def main():
 
 				if done:
 					loss = agent.update(keep_prob=0.7)
-
-					scores.append(score)
-                    			episodes.append(episode)
+					if episode == 0:
+						np_PG_data = np.array([[episode, loss, score]])
+					else:	
+	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
                     			score = round(score, 2)
                     			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
 					time.sleep(3)
@@ -353,8 +376,7 @@ if __name__ == '__main__':
 		print("finish")
 		
 		# Save Graph
-		pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./Learning_Img/reinforece.png")
+		np.save('./Learning_Data/PG_L_Data', np_PG_data)
 		print "\n<Learning Image Data is saved>"		
 
 		# Save model 
