@@ -1,2 +1,2 @@
-model_checkpoint_path: "policy_gradient_degree10_170_v4.ckpt"
-all_model_checkpoint_paths: "policy_gradient_degree10_170_v4.ckpt"
+model_checkpoint_path: "motor_test.ckpt"
+all_model_checkpoint_paths: "motor_test.ckpt"

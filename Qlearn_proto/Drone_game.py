@@ -17,11 +17,11 @@ import sysv_ipc
 import time
 import subprocess
 #proc = subprocess.Popen(["python","thread_test7.py"])
-#subprocess.Popen(["python","degree_process.py"])
+subprocess.Popen(["python","degree_process.py"])
 time.sleep(5)
 memory = sysv_ipc.SharedMemory(600)
 smp = sysv_ipc.Semaphore(128)
-PORT = 56793
+PORT = 56792
 BUFSIZE = 1024
 HOST = ''
 ADDR = (HOST, PORT)

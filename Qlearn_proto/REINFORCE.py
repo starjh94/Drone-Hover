@@ -32,7 +32,7 @@ class REINFORCEAgnet:
             		W2 = tf.get_variable("W2", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 
 			layer2 = tf.nn.tanh(tf.matmul(layer1, W2))
-            		layer2 = tf.nn.dropout(layer2, keep_prob= self.keep_prob)
+			layer2 = tf.nn.dropout(layer2, keep_prob= self.keep_prob)
 			
 			# Third layer of weights
             		W3 = tf.get_variable("W3", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())

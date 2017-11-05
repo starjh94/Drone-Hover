@@ -15,7 +15,8 @@ if len(sys.argv) == 2 :
 	elif sys.argv[1][-5:] != ".ckpt":
                 print "\nPlease write correctly!"
 		print "usage: sudo python *.py *.ckpt"
-        else:
+        	exit()
+	else:
 		
                 print "'%s' model will be restored!\n" %(sys.argv[1])
 		model_load = True
@@ -164,13 +165,18 @@ def reward_done_check(pre_degree, degree):
 """
 
 def reward_check(degree):
-        if degree[0] > -10 and degree[0] <+10:
+        
+	if degree[0] > -10 and degree[0] <+10:
 		if degree[1] > - 20 and degree[1] < +20:
-			return +110
+			return +100
+
+		elif degree[1] > -160 and degree[1] < +160:
+			return +10 
+
 		else:
-			return +100  
+			return -10
                 
-	elif degree[0] < -170 and degree[0] > +170:
+	elif degree[0] < -170 or degree[0] > +170:
 		return -100 
         else:
                 return  -0.1
@@ -309,7 +315,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(3, done_timer).start()
+			timer = threading.Timer(10, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
