@@ -90,7 +90,7 @@ output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Dow
 ## for pylab
 np_PG_data = np.array([[0, 0, 0]])
 
-def step_action(action, pwm_left, pwm_right, var=0.001):
+def step_action(action, pwm_left, pwm_right, var=0.0005):
 	if action == 0:
                 return pwm_left - var, pwm_right - var
         elif action == 1:
@@ -185,13 +185,20 @@ def reward_check(degree):
 ## main ##
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
+                return +10
+        else:
+                return -abs(degree[0]) 
+"""
+"""
+## main ##
+def reward_check(degree):
+        if degree[0] > -10 and degree[0] <+10:
                 return +100 
         elif degree[0] < -170 and degree[0] > +170:
                 return -100 
         else:
                 return -0.1 
 """
-
 """
 def reward_check(pre_degree, degree):
 	if degree[0] > -1 and degree[0] <1:
@@ -315,7 +322,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(10, done_timer).start()
+			timer = threading.Timer(40, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
