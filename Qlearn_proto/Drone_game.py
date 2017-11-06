@@ -56,3 +56,8 @@ while True:
     print data
     sendData.Body.acc_gyro =data
     MsgUtil.send(ClientSocket, sendData)
+    recvdata = ClientSocket.recv(1024)
+    if recvdata == None :
+	break
+
+ClientSocket.close()

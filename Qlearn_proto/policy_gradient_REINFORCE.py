@@ -84,7 +84,7 @@ memory_acc_degree = sysv_ipc.SharedMemory(256)
 memory_semaphore = sysv_ipc.Semaphore(128)
 
 ## Initialize - neural network
-input_size = 4    # (Degree, Angular Velocity, PWM_Left, PWM_Right)
+input_size = 2    # (Degree, Angular Velocity)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
 ## for pylab
@@ -163,21 +163,34 @@ def reward_done_check(pre_degree, degree):
         else:                                                           # <absolute> Degree ( now < past )
                 return 1/(abs(degree[0])+0.01), False
 """
-
+"""
 def reward_check(degree):
         
 	if degree[0] > -10 and degree[0] <+10:
-		if degree[1] > - 20 and degree[1] < +20:
+		if degree[1] > - 160 and degree[1] < +160:
 			return +100
-
+		
 		elif degree[1] > -160 and degree[1] < +160:
 			return +10 
-
+		
 		else:
 			return -10
                 
 	elif degree[0] < -170 or degree[0] > +170:
 		return -100 
+        else:
+                return  -0.1
+"""
+def reward_check(degree):
+        
+        if degree[0] > -10 and degree[0] <+10:
+               	if abs(degree[0]) < 160:
+			return +100
+		else:
+			return +10
+                
+        elif degree[0] < -170 or degree[0] > +170:
+                return -100 
         else:
                 return  -0.1
 
@@ -322,7 +335,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(40, done_timer).start()
+			timer = threading.Timer(10, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -334,7 +347,7 @@ def main():
 				acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
+				state = np.array([acc_gyro_pitch, p_ang_vel])
 				
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
 				#state = np.reshape(state, [1, 4])
@@ -361,7 +374,7 @@ def main():
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
+				next_state = np.array([acc_gyro_pitch, p_ang_vel])
 				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
 				reward = reward_check(next_state)
 				#reward = reward_check(state, next_state)

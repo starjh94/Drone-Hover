@@ -1,2 +1,2 @@
-model_checkpoint_path: "policy_gradient_degree10_170_v4_addangular_v10.ckpt"
-all_model_checkpoint_paths: "policy_gradient_degree10_170_v4_addangular_v10.ckpt"
+model_checkpoint_path: "new_state_reward_v3.ckpt"
+all_model_checkpoint_paths: "new_state_reward_v3.ckpt"
