@@ -1,3 +1,6 @@
+import subprocess
+subprocess.Popen(["python","degree_process.py"])
+
 import sys, time
 
 import navio.rcinput
@@ -71,6 +74,15 @@ def main():
 	
 	start_time = time.time()
 	timecheck_list.append(start_time)
+	while True:
+                                start_action = raw_input("\nI'm ready\nAre you ready?(Y / N): ")
+
+                                if start_action.upper() == "Y":
+                                        print "\nGame will be started! "
+                                        break
+                                else:
+                                        print "\nOK! let me do it again ~"
+
 	while(True):
 		timecheck_list.append(time.time())
         	loop_time = timecheck_list[1] - timecheck_list[0]

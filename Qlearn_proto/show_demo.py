@@ -1,3 +1,6 @@
+import subprocess
+subprocess.Popen(["python","degree_process.py"])
+
 import os
 import sys
 import glob
@@ -48,8 +51,6 @@ while True:
                 print "\nIt will be saved as '%s'" % (learning_model_name)
                 break
 
-import subprocess
-subprocess.Popen(["python","degree_process.py"])
 
 import Servo
 import numpy as np
@@ -334,8 +335,17 @@ def main():
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
+
+			while True:
+                        	start_action = raw_input("\nI'm ready\nAre you ready?(Y / N): ")
+
+                        	if start_action.upper() == "Y":
+                                	print "\nGame will be started! "
+                                	break
+                        	else:
+                                	print "\nOK! let me do it again ~"
 			
-			timer = threading.Timer(20, done_timer).start()
+			timer = threading.Timer(30, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)

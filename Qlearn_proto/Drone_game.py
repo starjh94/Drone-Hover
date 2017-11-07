@@ -18,10 +18,16 @@ import time
 import subprocess
 #proc = subprocess.Popen(["python","thread_test7.py"])
 #subprocess.Popen(["python","degree_process.py"])
+import sys
+
+if len(sys.argv) == 1:          # 옵션 없으면 도움말 출력하고 종료
+  print "숫자로 된 옵션을 입력해 주세요"
+  exit(1)
+
 time.sleep(5)
 memory = sysv_ipc.SharedMemory(600)
 smp = sysv_ipc.Semaphore(128)
-PORT = 56797
+PORT = int(sys.argv[1])
 BUFSIZE = 1024
 HOST = ''
 ADDR = (HOST, PORT)
@@ -53,11 +59,12 @@ while True:
     vari = memory.read()
     smp.release()
     data = float(vari.rstrip('\x00'))
-    print data
     sendData.Body.acc_gyro =data
     MsgUtil.send(ClientSocket, sendData)
-    recvdata = ClientSocket.recv(1024)
+    print data
+    """
+     recvdata = ClientSocket.recv(1024)
     if recvdata == None :
 	break
-
+    """
 ClientSocket.close()
