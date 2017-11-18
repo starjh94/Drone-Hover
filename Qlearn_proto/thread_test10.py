@@ -19,7 +19,8 @@ def safeBoundary(value):
 
         return value
 
-
+count = 0
+start_time = time.time()
 share_acc_gyro_pitch = sysv_ipc.SharedMemory( 1234, flags=01000,size=20 ,mode=0600)
 share_p_ang_vel = sysv_ipc.SharedMemory( 12345, flags=01000,size=10 ,mode=0600)
 smp1 = sysv_ipc.Semaphore(22, flags=01000,mode=0600,initial_value = 1)
@@ -30,7 +31,9 @@ acc_gyro_pitch = gyro_pitch_degree = b.pitch()
                 
 start_time = time.time()
 timecheck_list.append(start_time)
+
 while(True):
+	end_time = time.time()
 	acc_pitch_degree = b.pitch()
 	timecheck_list.append(time.time())
 	loop_time = timecheck_list[1] - timecheck_list[0]
@@ -57,3 +60,6 @@ while(True):
 	share_acc_gyro_pitch.write(str(acc_gyro_pitch))
 	#print "11"
 	smp1.release()
+	count = count + 1
+	if end_time - start_time >=1:
+		print count

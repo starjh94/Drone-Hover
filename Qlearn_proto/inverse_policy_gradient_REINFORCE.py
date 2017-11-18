@@ -181,35 +181,24 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
-"""
+
 ## main ##
 def reward_check(degree):
-        
-        if degree[0] > -10 and degree[0] <+10:
-                if abs(degree[0]) < 160:
-                        return +100
-                else:
-                        return +10
+       	if degree[0] < -150 or degree[0] > +150:
+		return +1
+	
+	else:
+		return -(180 - abs(degree[0])) / 180
+	""" 
+        if degree[0] < -170 or degree[0] > +170:
+               	return +1000
                 
-        elif degree[0] < -170 or degree[0] > +170:
+        elif degree[0] > -10 and degree[0] < +10:
                 return -100 
+
         else:
                 return  -0.1
-"""
-
-def reward_check(degree):
-        
-        if degree[0] > -10 and degree[0] <+10:
-               	if abs(degree[1]) < 160:
-			return +100
-		else:
-			return +10
-                
-        elif degree[0] < -170 or degree[0] > +170:
-                return -100 
-        else:
-                return  -0.1
-
+	"""
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
@@ -218,7 +207,6 @@ def reward_check(degree):
                 return -abs(degree[0]) 
 """
 """
-## main ##
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
                 return +100 
@@ -350,7 +338,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(30, done_timer).start()
+			timer = threading.Timer(10, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -376,7 +364,7 @@ def main():
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
-				time.sleep(0.05)
+				time.sleep(0.01)
 				
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
