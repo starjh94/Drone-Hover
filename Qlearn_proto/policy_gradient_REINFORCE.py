@@ -90,7 +90,7 @@ output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Dow
 ## for pylab
 np_PG_data = np.array([[0, 0, 0]])
 
-def step_action(action, pwm_left, pwm_right, var=0.0005):
+def step_action(action, pwm_left, pwm_right, var=0.001):
 	if action == 0:
                 return pwm_left - var, pwm_right - var
         elif action == 1:
@@ -196,24 +196,29 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
-
+"""
 def reward_check(degree):
         
         if degree[0] > -10 and degree[0] <+10:
-               	if abs(degree[1]) < 160:
+		if abs(degree[1]) < 160:
 			return +100
 		else:
 			return +10
-                
         elif degree[0] < -170 or degree[0] > +170:
                 return -100 
         else:
                 return  -0.1
+"""
 
+def reward_check(degree):
+        if degree[0] > -10 and degree[0] <+10:
+                return +100
+	else:
+		return -0.1
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
-                return +10
+                return +100
         else:
                 return -abs(degree[0]) 
 """
@@ -350,7 +355,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(30, done_timer).start()
+			timer = threading.Timer(5, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -376,7 +381,7 @@ def main():
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
-				time.sleep(0.05)
+				time.sleep(0.01)
 				
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
