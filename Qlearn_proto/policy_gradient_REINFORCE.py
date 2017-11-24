@@ -90,7 +90,7 @@ output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Dow
 ## for pylab
 np_PG_data = np.array([[0, 0, 0]])
 
-def step_action(action, pwm_left, pwm_right, var=0.001):
+def step_action(action, pwm_left, pwm_right, var=0.0005):
 	if action == 0:
                 return pwm_left - var, pwm_right - var
         elif action == 1:
@@ -209,21 +209,53 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
-
+"""
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
-                return +100
+		if abs(degree[1]) < 160: 
+                	return +100
+		else:
+			return -abs(degree[0]) / 180
 	else:
-		return -0.1
+		return - abs(degree[0]) / 180
 """
+"""
+def reward_check(degree):
+	reward = 0
+	if abs(degree[1]) < 30:
+		reward += 5000
+ 	else:
+		reward += 0.1
+
+	if abs(degree[0]) < 30:
+		reward += (1000 - abs(degree[1]))
+	else:
+		reward += 0.1
+
+	return reward
+"""
+
+"""
+## main ##
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
                 return +100
         else:
-                return -abs(degree[0]) 
+                return -abs(degree[0]) / 180 
 """
+
+def reward_check(degree, target_D=0):
+	if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+		reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+		get_point = True 
+	else:
+		reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2)
+		get_point = False		
+
+	#print -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))
+	return reward, get_point
+
 """
-## main ##
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
                 return +100 
@@ -351,11 +383,12 @@ def main():
 			done = False
             		done_episode = False
 			score = 0
+			point = 0
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(5, done_timer).start()
+			timer = threading.Timer(10, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -381,7 +414,7 @@ def main():
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
-				time.sleep(0.01)
+				time.sleep(0.05)
 				
 				## Get new state and reward from environment
 				memory_semaphore.acquire(10)
@@ -396,14 +429,18 @@ def main():
 				memory_semaphore.release()
 				next_state = np.array([acc_gyro_pitch, p_ang_vel])
 				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
-				reward = reward_check(next_state)
+				reward, get_point = reward_check(next_state)
 				#reward = reward_check(state, next_state)
 				if done_episode == True:
 					done = done_episode
 				
 				agent.append_sample(state, action, reward)
 				score += reward
-				state = copy.deepcopy(next_state)
+				
+				if get_point:
+					point += 10
+				
+				#state = copy.deepcopy(next_state)
 
 				if done:
 					loss = agent.update(keep_prob=0.7)
@@ -412,7 +449,7 @@ def main():
 					else:	
 	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
                     			score = round(score, 2)
-                    			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
+                    			print "episode: %s  loss: %s  reward: %s  point %s" %(episode, loss ,score, point)
 					time.sleep(3)
 			
 if __name__ == '__main__':

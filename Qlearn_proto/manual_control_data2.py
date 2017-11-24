@@ -1,3 +1,6 @@
+import subprocess
+subprocess.Popen(["python","degree_process.py"])
+
 import sys, time
 
 import navio.rcinput
@@ -5,7 +8,7 @@ import navio.util
 import navio.pwm
 import degree_gyro
 import numpy as np
-import pdb
+
 import Servo
 import threading
 period1 = 0
@@ -71,6 +74,15 @@ def main():
 	
 	start_time = time.time()
 	timecheck_list.append(start_time)
+	while True:
+                                start_action = raw_input("\nI'm ready\nAre you ready?(Y / N): ")
+
+                                if start_action.upper() == "Y":
+                                        print "\nGame will be started! "
+                                        break
+                                else:
+                                        print "\nOK! let me do it again ~"
+
 	while(True):
 		timecheck_list.append(time.time())
         	loop_time = timecheck_list[1] - timecheck_list[0]
@@ -82,11 +94,11 @@ def main():
         	acc_gyro_pitch = np.sign(get_gyro_degree) * ((0.97 * abs(get_gyro_degree)) + (0.03 * abs(acc_pitch_degree)))
 		
 		## servo part ##
-		servo_pwm1 = pwm_1 + (int(period3) - 982) * 0.00049 
-		servo_pwm2 = pwm_2 + (int(period1) - 982) * 0.00049
+		servo_pwm1 = pwm_1 + (int(period3) - 982) * 0.0005
+		servo_pwm2 = pwm_2 + (int(period1) - 982) * 0.0005
 
-        	a.servo_1(1.3)
-        	a.servo_2(1.3)
+        	a.servo_1(servo_pwm1)
+        	a.servo_2(servo_pwm2)
 		
 		## for matplotlib ##
         	data_time = time.time() - start_time
@@ -101,7 +113,6 @@ def main():
 		
        		print "<time: %.16s> : degree= %.16s    \tpwm_1= %.5s pwm2= %.5s" % (data_time, acc_gyro_pitch, servo_pwm1, servo_pwm2)
 		#print "pwm_v1 = %s pwm_v2 = %s degree = C: %s\t<-\tG: %s vs A: %s" % (servo_pwm1, servo_pwm2, acc_gyro_pitch, gyro_pitch_degree, acc_pitch_degree)	
-		#pdb.set_trace() 
 		time.sleep(0.01)
 	
 if __name__ == '__main__':
