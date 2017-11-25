@@ -110,6 +110,17 @@ def step_action(action, pwm_left, pwm_right, var=0.0005):
 	else:
 		return pwm_left + var, pwm_right + var
 
+def safeBoundary(value):
+        ## <boundary value change> Degree -180 ~ +180           
+        if (value >= -180 and value <= 180):
+                pass
+        elif (value < -180):
+                value = 360 + value     ## x = 180 - ( abs(x) - 180 )           
+        else:   ## (pitch_gyro >= 180)
+                value = -360 + value
+
+        return value
+
 def safe_pwm(pwm_left, pwm_right):
 	pwm_l = pwm_left
 	pwm_r = pwm_right	
@@ -244,7 +255,27 @@ def reward_check(degree):
                 return -abs(degree[0]) / 180 
 """
 
-def reward_check(degree, target_D=0):
+def reward_check(degree, target_D = 0):
+	if abs(target_D) > 170:
+		if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+      			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+			get_point = True
+		else:
+			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+			get_point = False
+	
+	else:
+		if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+                        get_point = True
+		else:
+			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+                        get_point = False
+	
+	print -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))	
+	return reward, get_point
+"""
+def reward_check(degree, target_D = 0):
 	if degree[0] > target_D - 10 and degree[0] < target_D + 10:
 		reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
 		get_point = True 
@@ -254,7 +285,19 @@ def reward_check(degree, target_D=0):
 
 	#print -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))
 	return reward, get_point
+"""
+"""
+def reward_check(degree, target_D=180):
+        if degree[0] < -170 or  degree[0] > +170:
+                reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+                get_point = True 
+        else:
+                reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2)
+                get_point = False               
 
+        #print -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))
+        return reward, get_point
+"""
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:

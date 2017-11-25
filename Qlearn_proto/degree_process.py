@@ -7,9 +7,9 @@ np_degree_data = np.array([[0, 0, 0, 0]])
 
 def safeBoundary(value):
 	## <boundary value change> Degree -180 ~ +180 		
-	if (value > -180 and value < 180):
+	if (value >= -180 and value <= 180):
 		pass
-	elif (value <= -180):
+	elif (value < -180):
 		value = 360 + value	## x = 180 - ( abs(x) - 180 )	 	
 	else: 	## (pitch_gyro >= 180)
 		value = -360 + value
