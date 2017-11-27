@@ -18,7 +18,7 @@ import sysv_ipc
 import time
 import subprocess
 #proc = subprocess.Popen(["python","thread_test7.py"])
-subprocess.Popen(["python","degree_process.py"])
+#subprocess.Popen(["python","degree_process.py"])
 import sys
 
 svrsock = socket(AF_INET, SOCK_DGRAM)
@@ -36,8 +36,6 @@ HOST = ''
 #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #sock.bind(ADDR)
 threads = []
-pem_path = "ka.png"
-pem_size = 5
 #sock.listen(5)
 print "Waiting for incoming connections..."
 #ClientSocket, addr_info = sock.accept()
@@ -59,9 +57,11 @@ while True:
     #sendData.Header.BODYLEN = sendData.Body.GetSize()
     smp.acquire(10)
     vari = memory.read()
+    
+    #print "Server Read()"
     smp.release()
     data = vari.rstrip('\x00')
-    print data
+   # print data
     svrsock.sendto(data,addr)
 #sendData.Body.acc_gyro =data
    # MsgUtil.send(ClientSocket, sendData)
@@ -70,5 +70,5 @@ while True:
     if recvdata == None :
         break
     """
-    time.sleep(0.01)
+    #time.sleep(0.01)
 ClientSocket.close()

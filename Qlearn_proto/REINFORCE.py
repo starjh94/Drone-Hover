@@ -18,7 +18,7 @@ class REINFORCEAgnet:
     	def leaky_relu(self, x, alpha):
                 return tf.nn.relu(x) - alpha * tf.nn.relu(-x)
             
-    	def _build_network(self, h_size=24, l_rate=1e-3):
+    	def _build_network(self, h_size=24, l_rate=1e-4):
 		with tf.variable_scope(self.name):
             		self._X = tf.placeholder(tf.float32, [None, self.state_size], name="input_x")
 			

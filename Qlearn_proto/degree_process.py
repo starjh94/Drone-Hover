@@ -65,9 +65,10 @@ def main():
 		share_acc_pitch_degree.write(str("%0.1f" % acc_pitch_degree).ljust(19," "))
 		share_acc_gyro_pitch.write(str("%0.1f" % acc_gyro_pitch).ljust(19," "))
 		share_p_ang_vel.write(str("%0.1f" % p_ang_vel).ljust(19," "))
+		#print "Degree Process Write!!!"
 		smp1.release()		
 		
-		time.sleep(0.01)
+		#time.sleep(0.01)
 if __name__ == '__main__':
 	try:
 		main()

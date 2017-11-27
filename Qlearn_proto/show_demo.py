@@ -396,12 +396,14 @@ def main():
 				state = copy.deepcopy(next_state)
 
 				if done:
+					"""
 					loss = agent.update(keep_prob=0.7)
 					if episode == 0:
 						np_PG_data = np.array([[episode, loss, score]])
 					else:	
 	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
-                    			score = round(score, 2)
+                    			"""
+					score = round(score, 2)
                     			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
 					time.sleep(3)
 			
