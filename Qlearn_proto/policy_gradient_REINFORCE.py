@@ -250,30 +250,81 @@ def reward_check(degree):
 ## main ##
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
-                return +100
+                return +100, True
         else:
-                return -abs(degree[0]) / 180 
+                return -abs(degree[0]) / 180, False
 """
 
+## *** ##
+def reward_check(degree, target_D = 0):
+        if abs(target_D) > 170:
+                if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+                        get_point = True
+                else:
+                        get_point = False
+
+        else:
+                if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+                        get_point = True
+                else:
+                        get_point = False
+        
+        
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2) / 100 
+        #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
+        print "reward: %s" % reward
+	return reward, get_point
+
+"""
+## *** ##
 def reward_check(degree, target_D = 0):
 	if abs(target_D) > 170:
 		if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
-      			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+      			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2)))
+			#reward = -(((degree[1] ** 2) / (100 ** 2)))
 			get_point = True
 		else:
-			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+			reward = -1
 			get_point = False
 	
 	else:
 		if degree[0] > target_D - 10 and degree[0] < target_D + 10:
-			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
-                        get_point = True
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+                        reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2)))
+			#reward = -(((degree[1] ** 2) / (100 ** 2)))
+			get_point = True
+			#print -(((degree[1] ** 2) / (100 ** 2)))
+			print "\tmod: %s, origin: %s" % (-((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2))), -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (2000 ** 2))) )
 		else:
-			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+                        reward = -1
+			get_point = False
+	
+	#print "Deg: %s(origin), %s(mod) // Ang: %s(origin), %s(mod) // result: %s" % (-((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2), (((degree[1] ** 2) / (2000 ** 2))), (((degree[1] ** 2) / (200 ** 2))) ,-((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (200 ** 2))) )	
+	return reward, get_point
+"""
+"""
+## *** ##
+def reward_check(degree, target_D = 0):
+        if abs(target_D) > 170:
+                if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+                        get_point = True
+                else:
+                        get_point = False
+
+        else:
+                if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+                        get_point = True
+                else:
                         get_point = False
 	
-	print -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))	
-	return reward, get_point
+	
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2)
+        #print -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))    
+        return reward, get_point
+"""
 """
 def reward_check(degree, target_D = 0):
 	if degree[0] > target_D - 10 and degree[0] < target_D + 10:

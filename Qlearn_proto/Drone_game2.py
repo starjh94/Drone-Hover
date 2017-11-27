@@ -3,6 +3,7 @@ import socket
 import struct
 import os
 import sys
+import time
 import socket
 import Msg
 from socket import *
@@ -17,7 +18,7 @@ import sysv_ipc
 import time
 import subprocess
 #proc = subprocess.Popen(["python","thread_test7.py"])
-#subprocess.Popen(["python","degree_process.py"])
+subprocess.Popen(["python","degree_process.py"])
 import sys
 
 svrsock = socket(AF_INET, SOCK_DGRAM)
@@ -60,14 +61,14 @@ while True:
     vari = memory.read()
     smp.release()
     data = vari.rstrip('\x00')
-
+    print data
     svrsock.sendto(data,addr)
 #sendData.Body.acc_gyro =data
    # MsgUtil.send(ClientSocket, sendData)
-    print data
     """
      recvdata = ClientSocket.recv(1024)
     if recvdata == None :
         break
     """
+    time.sleep(0.01)
 ClientSocket.close()

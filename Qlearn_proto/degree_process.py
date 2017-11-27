@@ -66,7 +66,8 @@ def main():
 		share_acc_gyro_pitch.write(str("%0.1f" % acc_gyro_pitch).ljust(19," "))
 		share_p_ang_vel.write(str("%0.1f" % p_ang_vel).ljust(19," "))
 		smp1.release()		
-
+		
+		time.sleep(0.01)
 if __name__ == '__main__':
 	try:
 		main()
