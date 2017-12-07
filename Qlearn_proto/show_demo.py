@@ -69,11 +69,11 @@ import pylab
 import pdb
 ## Initialize - drone
 count = 1
-init_pwm_1 = 1.25
+init_pwm_1 = 1.15
 init_pwm_2 = 1.15
 l_plus_pwm = 0.37
-r_plus_pwm = 0.42
-
+#r_plus_pwm = 0.42
+r_plus_pwm = 0.37
 
 start_time = 0
 
@@ -126,6 +126,17 @@ def safe_pwm(pwm_left, pwm_right):
 		pwm_r = 1.57
 
 	return pwm_l, pwm_r
+
+def safeBoundary(value):
+        ## <boundary value change> Degree -180 ~ +180           
+        if (value >= -180 and value <= 180):
+                pass
+        elif (value < -180):
+                value = 360 + value     ## x = 180 - ( abs(x) - 180 )           
+        else:   ## (pitch_gyro >= 180)
+                value = -360 + value
+
+        return value
 
 def action_print(action):
         if action == 0:
@@ -182,6 +193,7 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
+"""
 def reward_check(degree):
         
         if degree[0] > -10 and degree[0] <+10:
@@ -194,6 +206,27 @@ def reward_check(degree):
                 return -100 
         else:
                 return  -0.1
+
+"""
+## *** ##
+def reward_check(degree, target_D = 0):
+        if abs(target_D) > 170:
+                if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+                        get_point = True
+                else:
+                        get_point = False
+
+        else:
+                if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+                        get_point = True
+                else:
+                        get_point = False
+        
+        
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2) / 10  
+        #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
+        print "reward: %s" % reward
+	return reward, get_point
 
 """
 ## main ##
@@ -332,6 +365,7 @@ def main():
 			done = False
             		done_episode = False
 			score = 0
+			point = 0			
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
@@ -386,14 +420,18 @@ def main():
 				memory_semaphore.release()
 				next_state = np.array([acc_gyro_pitch, p_ang_vel])
 				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
-				reward = reward_check(next_state)
+				reward, get_point = reward_check(next_state)
 				#reward = reward_check(state, next_state)
 				if done_episode == True:
 					done = done_episode
 				
 				agent.append_sample(state, action, reward)
 				score += reward
-				state = copy.deepcopy(next_state)
+				#state = copy.deepcopy(next_state)
+
+				if get_point:
+					point += 10
+				
 
 				if done:
 					"""
@@ -404,7 +442,8 @@ def main():
 	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
                     			"""
 					score = round(score, 2)
-                    			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
+                    			#print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
+					print "episode: %s  reward: %s  point %s" %(episode, score, point)
 					time.sleep(3)
 			
 if __name__ == '__main__':

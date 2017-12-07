@@ -207,19 +207,19 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
-"""
+
 def reward_check(degree):
         
         if degree[0] > -10 and degree[0] <+10:
 		if abs(degree[1]) < 160:
-			return +100
+			return +100, True
 		else:
-			return +10
+			return +10, True
         elif degree[0] < -170 or degree[0] > +170:
-                return -100 
+                return -100, False 
         else:
-                return  -0.1
-"""
+                return  -0.1, False
+
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
@@ -254,7 +254,7 @@ def reward_check(degree):
         else:
                 return -abs(degree[0]) / 180, False
 """
-
+"""
 ## *** ##
 def reward_check(degree, target_D = 0):
         if abs(target_D) > 170:
@@ -274,7 +274,7 @@ def reward_check(degree, target_D = 0):
         #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
         print "reward: %s" % reward
 	return reward, get_point
-
+"""
 """
 ## *** ##
 def reward_check(degree, target_D = 0):
@@ -482,7 +482,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(20, done_timer).start()
+			timer = threading.Timer(30, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)

@@ -49,7 +49,7 @@ def main():
 	global np_ML_data
 	global start_time	
 
-	pwm_1 = 1.22
+	pwm_1 = 1.1
 	pwm_2 = 1.1
 	print "start"
 	a = Servo.servo()

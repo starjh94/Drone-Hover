@@ -1,2 +1,2 @@
-model_checkpoint_path: "q_v32.ckpt"
-all_model_checkpoint_paths: "q_v32.ckpt"
+model_checkpoint_path: "abc.ckpt"
+all_model_checkpoint_paths: "abc.ckpt"
