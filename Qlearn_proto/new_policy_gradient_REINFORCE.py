@@ -1,7 +1,7 @@
 import os
 import sys
 import glob
-#import pdb
+import pdb
 
 model_load = False
 
@@ -62,17 +62,17 @@ import copy
 import sysv_ipc
 import tensorflow as tf
 import random
-import REINFORCE
+import new_REINFORCE
 
 import matplotlib.pyplot
 import pylab
 import pdb
 ## Initialize - drone
 count = 1
-init_pwm_1 = 1.25
-init_pwm_2 = 1.15
-l_plus_pwm = 0.37
-r_plus_pwm = 0.42
+init_pwm_1 = 1.12    #past: 1.25 -> 1.15
+init_pwm_2 = 1.12    #past: 1.15 -> 1.15
+l_plus_pwm = 0.45    #past: 0.37 -> 0.42
+r_plus_pwm = 0.45    #past: 0.42 -> 0.42
 
 
 start_time = 0
@@ -85,7 +85,7 @@ memory_acc_degree = sysv_ipc.SharedMemory(256)
 memory_semaphore = sysv_ipc.Semaphore(128)
 
 ## Initialize - neural network
-input_size = 2    # (Degree, Angular Velocity)
+input_size = 4    # (Degree, Angular Velocity, left_motor, right_motor)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
 ## for pylab
@@ -111,17 +111,28 @@ def step_action(action, pwm_left, pwm_right, var=0.0005):
 	else:
 		return pwm_left + var, pwm_right + var
 
+def safeBoundary(value):
+        ## <boundary value change> Degree -180 ~ +180           
+        if (value >= -180 and value <= 180):
+                pass
+        elif (value < -180):
+                value = 360 + value     ## x = 180 - ( abs(x) - 180 )           
+        else:   ## (pitch_gyro >= 180)
+                value = -360 + value
+
+        return value
+
 def safe_pwm(pwm_left, pwm_right):
 	pwm_l = pwm_left
 	pwm_r = pwm_right	
 
-	if(pwm_left < 1.22):
-		pwm_l = 1.22
-	elif(pwm_left > 1.62):
-		pwm_l = 1.62
+	if(pwm_left < 1.12):    
+		pwm_l = 1.12    
+	elif(pwm_left > 1.57):    #past: 1.62
+		pwm_l = 1.57    #past: 1.62
 	
-	if(pwm_right < 1.12):
-		pwm_r = 1.12
+	if(pwm_right < 1.12):    
+		pwm_r = 1.12    
 	elif(pwm_right > 1.57):
 		pwm_r = 1.57
 
@@ -198,36 +209,151 @@ def reward_check(degree):
                 return  -0.1
 """
 """
+## Display ##
 def reward_check(degree):
         
         if degree[0] > -10 and degree[0] <+10:
 		if abs(degree[1]) < 160:
-			return +100
+			return +100, True
 		else:
-			return +10
+			return +10, True
         elif degree[0] < -170 or degree[0] > +170:
-                return -100 
+                return -100, False 
         else:
-                return  -0.1
+                return  -0.1, False
 """
-
-def reward_check(degree, next_degree):
-        if next_degree[0] > -10 and next_degree[0] <+10:
-                return +100, False
-	else:
-		if degree[0] > -10 and degree[0] <+10:
-			return -0.1, True
-		else:
-			return -0.1, False
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
-                return +100
-        else:
-                return -abs(degree[0]) 
+		if abs(degree[1]) < 160: 
+                	return +100
+		else:
+			return -abs(degree[0]) / 180
+	else:
+		return - abs(degree[0]) / 180
 """
+"""
+def reward_check(degree):
+	reward = 0
+	if abs(degree[1]) < 30:
+		reward += 5000
+ 	else:
+		reward += 0.1
+
+	if abs(degree[0]) < 30:
+		reward += (1000 - abs(degree[1]))
+	else:
+		reward += 0.1
+
+	return reward
+"""
+
 """
 ## main ##
+def reward_check(degree):
+        if degree[0] > -10 and degree[0] <+10:
+                return +100, True
+        else:
+                return -abs(degree[0]) / 180, False
+"""
+
+## *** Fixed *** ##
+def reward_check(degree, target_D = 180):
+        if abs(target_D) > 170:
+                if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+                        get_point = True
+                else:
+                        get_point = False
+
+        else:
+                if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+                        get_point = True
+                else:
+                        get_point = False
+        
+        
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2)  
+        #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
+        print "reward: %s" % reward
+	return reward, get_point
+
+
+
+
+"""
+def reward_check(degree, target_D = 0):
+	if abs(target_D) > 170:
+		if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+      			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+			reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2)))
+			#reward = -(((degree[1] ** 2) / (100 ** 2)))
+			get_point = True
+		else:
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+			reward = -1
+			get_point = False
+	
+	else:
+		if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+                        reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2)))
+			#reward = -(((degree[1] ** 2) / (100 ** 2)))
+			get_point = True
+			#print -(((degree[1] ** 2) / (100 ** 2)))
+			print "\tmod: %s, origin: %s" % (-((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (100 ** 2))), -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (2000 ** 2))) )
+		else:
+			#reward = -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2)
+                        reward = -1
+			get_point = False
+	
+	#print "Deg: %s(origin), %s(mod) // Ang: %s(origin), %s(mod) // result: %s" % (-((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), -((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2), (((degree[1] ** 2) / (2000 ** 2))), (((degree[1] ** 2) / (200 ** 2))) ,-((safeBoundary(degree[0] - target_D)) ** 2) / (10 ** 2) * (((degree[1] ** 2) / (200 ** 2))) )	
+	return reward, get_point
+"""
+"""
+## *** ##
+def reward_check(degree, target_D = 0):
+        if abs(target_D) > 170:
+                if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
+                        get_point = True
+                else:
+                        get_point = False
+
+        else:
+                if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+                        get_point = True
+                else:
+                        get_point = False
+	
+	
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2)
+        #print -((safeBoundary(degree[0] - target_D)) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))    
+        return reward, get_point
+"""
+"""
+def reward_check(degree, target_D = 0):
+	if degree[0] > target_D - 10 and degree[0] < target_D + 10:
+		reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+		get_point = True 
+	else:
+		reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2)
+		get_point = False		
+
+	#print -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))
+	return reward, get_point
+"""
+"""
+def reward_check(degree, target_D=180):
+        if degree[0] < -170 or  degree[0] > +170:
+                reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2) * (((degree[1] ** 2) / (2000 ** 2)))
+                get_point = True 
+        else:
+                reward = -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2)
+                get_point = False               
+
+        #print -((abs(target_D) - abs(degree[0])) ** 2) / (180 ** 2), (((degree[1] ** 2) / (2000 ** 2)))
+        return reward, get_point
+"""
+"""
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
                 return +100 
@@ -341,7 +467,7 @@ def main():
 	sess = tf.Session()
 	if True:
 		#pdb.set_trace()
-		agent = REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
+		agent = new_REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
 		if not model_load:
 			tf.global_variables_initializer().run(session=sess)
 		else:
@@ -354,14 +480,13 @@ def main():
 			print "new episodes initializaion"
 			done = False
             		done_episode = False
-			step = 0
 			score = 0
+			point = 0
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(10, done_timer)
-			timer.start()
+			timer = threading.Timer(30, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -373,7 +498,7 @@ def main():
 				acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				state = np.array([acc_gyro_pitch, p_ang_vel])
+				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 				
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
 				#state = np.reshape(state, [1, 4])
@@ -400,36 +525,31 @@ def main():
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				next_state = np.array([acc_gyro_pitch, p_ang_vel])
+				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
-				#reward = reward_check(next_state)
-				reward, done = reward_check(state, next_state)
-			
+				reward, get_point = reward_check(next_state)
+				#reward = reward_check(state, next_state)
 				if done_episode == True:
-					done = done_episode				
+					done = done_episode
 				
 				agent.append_sample(state, action, reward)
 				score += reward
-				state = copy.deepcopy(next_state)
 				
-				if step == 0:
-					done = False						
-	
+				if get_point:
+					point += 10
+				
+				#state = copy.deepcopy(next_state)
+
 				if done:
-					if not done_episode:
-						#pdb.set_trace()
-						timer.cancel()				
-					
 					loss = agent.update(keep_prob=0.7)
 					if episode == 0:
 						np_PG_data = np.array([[episode, loss, score]])
 					else:	
 	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
                     			score = round(score, 2)
-                    			print "episode: %s  loss: %s  score: %s" %(episode, loss ,score)
-					
+                    			print "episode: %s  loss: %s  reward: %s  point %s" %(episode, loss ,score, point)
 					time.sleep(3)
-				step += 1	
+			
 if __name__ == '__main__':
     	try :
 		main()
