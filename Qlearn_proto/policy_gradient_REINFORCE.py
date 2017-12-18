@@ -68,10 +68,10 @@ import pylab
 import pdb
 ## Initialize - drone
 count = 1
-init_pwm_1 = 1.25
-init_pwm_2 = 1.15
-l_plus_pwm = 0.37
-r_plus_pwm = 0.42
+init_pwm_1 = 1.15    #past: 1.25
+init_pwm_2 = 1.15    #past: 1.15
+l_plus_pwm = 0.42    #past: 0.37
+r_plus_pwm = 0.42    #past: 0.42
 
 
 start_time = 0
@@ -125,13 +125,13 @@ def safe_pwm(pwm_left, pwm_right):
 	pwm_l = pwm_left
 	pwm_r = pwm_right	
 
-	if(pwm_left < 1.22):
-		pwm_l = 1.22
-	elif(pwm_left > 1.62):
-		pwm_l = 1.62
+	if(pwm_left < 1.12):    
+		pwm_l = 1.12    
+	elif(pwm_left > 1.57):    #past: 1.62
+		pwm_l = 1.57    #past: 1.62
 	
-	if(pwm_right < 1.12):
-		pwm_r = 1.12
+	if(pwm_right < 1.12):    
+		pwm_r = 1.12    
 	elif(pwm_right > 1.57):
 		pwm_r = 1.57
 
@@ -207,7 +207,8 @@ def reward_check(degree):
         else:
                 return  -0.1
 """
-
+"""
+## Display ##
 def reward_check(degree):
         
         if degree[0] > -10 and degree[0] <+10:
@@ -219,7 +220,7 @@ def reward_check(degree):
                 return -100, False 
         else:
                 return  -0.1, False
-
+"""
 """
 def reward_check(degree):
         if degree[0] > -10 and degree[0] <+10:
@@ -254,9 +255,9 @@ def reward_check(degree):
         else:
                 return -abs(degree[0]) / 180, False
 """
-"""
-## *** ##
-def reward_check(degree, target_D = 0):
+
+## *** Fixed *** ##
+def reward_check(degree, target_D = 180):
         if abs(target_D) > 170:
                 if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
                         get_point = True
@@ -270,13 +271,15 @@ def reward_check(degree, target_D = 0):
                         get_point = False
         
         
-        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2) / 10  
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2)  
         #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
         print "reward: %s" % reward
 	return reward, get_point
+
+
+
+
 """
-"""
-## *** ##
 def reward_check(degree, target_D = 0):
 	if abs(target_D) > 170:
 		if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):

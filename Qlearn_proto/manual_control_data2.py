@@ -49,8 +49,8 @@ def main():
 	global np_ML_data
 	global start_time	
 
-	pwm_1 = 1.1
-	pwm_2 = 1.1
+	pwm_1 = 1.12
+	pwm_2 = 1.12
 	print "start"
 	a = Servo.servo()
 	b = degree_gyro.acc()

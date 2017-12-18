@@ -115,10 +115,10 @@ def safe_pwm(pwm_left, pwm_right):
 	pwm_l = pwm_left
 	pwm_r = pwm_right	
 
-	if(pwm_left < 1.22):
-		pwm_l = 1.22
-	elif(pwm_left > 1.62):
-		pwm_l = 1.62
+	if(pwm_left < 1.12):
+		pwm_l = 1.12
+	elif(pwm_left > 1.57):
+		pwm_l = 1.57
 	
 	if(pwm_right < 1.12):
 		pwm_r = 1.12
