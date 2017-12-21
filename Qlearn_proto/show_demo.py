@@ -23,7 +23,7 @@ if len(sys.argv) == 2 :
 		
                 print "'%s' model will be restored!\n" %(sys.argv[1])
 		model_load = True
-
+"""
 ## Enter Model name		
 while True:
         learning_model_name= raw_input("Model name for save(<ex> *.ckpt) : ")
@@ -50,7 +50,7 @@ while True:
         else:
                 print "\nIt will be saved as '%s'" % (learning_model_name)
                 break
-
+"""
 
 import Servo
 import numpy as np
@@ -62,18 +62,18 @@ import copy
 import sysv_ipc
 import tensorflow as tf
 import random
-import REINFORCE
+import new_REINFORCE
 
 import matplotlib.pyplot
 import pylab
 import pdb
 ## Initialize - drone
 count = 1
-init_pwm_1 = 1.15
-init_pwm_2 = 1.15
-l_plus_pwm = 0.37
+init_pwm_1 = 1.12
+init_pwm_2 = 1.12
+l_plus_pwm = 0.45
 #r_plus_pwm = 0.42
-r_plus_pwm = 0.37
+r_plus_pwm = 0.45
 
 start_time = 0
 
@@ -85,7 +85,7 @@ memory_acc_degree = sysv_ipc.SharedMemory(256)
 memory_semaphore = sysv_ipc.Semaphore(128)
 
 ## Initialize - neural network
-input_size = 2    # (Degree, Angular Velocity)
+input_size = 4    # (Degree, Angular Velocity)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
 ## for pylab
@@ -223,7 +223,7 @@ def reward_check(degree, target_D = 0):
                         get_point = False
         
         
-        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2) / 10  
+        reward = -((safeBoundary(degree[0] - target_D)) ** 2) - (degree[1] ** 2)  
         #print "reward: %s (Deg: %s | Ang: %s)" %  (reward,-((safeBoundary(degree[0] - target_D)) ** 2) , -(degree[1] ** 2))    
         print "reward: %s" % reward
 	return reward, get_point
@@ -351,7 +351,7 @@ def main():
 	sess = tf.Session()
 	if True:
 		#pdb.set_trace()
-		agent = REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
+		agent = new_REINFORCE.REINFORCEAgnet(sess, input_size, output_size, name="main")
 		if not model_load:
 			tf.global_variables_initializer().run(session=sess)
 		else:
@@ -391,7 +391,7 @@ def main():
 				acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				state = np.array([acc_gyro_pitch, p_ang_vel])
+				state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 				
 				print "\t\t\t<state> degree: %s, \tangular velocity: %s" %(state[0],  state[1])
 				#state = np.reshape(state, [1, 4])
@@ -418,7 +418,7 @@ def main():
                                 acc_pitch = float(acc_degree.rstrip('\x00'))
 				
 				memory_semaphore.release()
-				next_state = np.array([acc_gyro_pitch, p_ang_vel])
+				next_state = np.array([acc_gyro_pitch, p_ang_vel, pwm_left, pwm_right])
 				print "\t\t\t<next-state> degree: %s, \tangular velocity: %s" %(next_state[0], next_state[1])	
 				reward, get_point = reward_check(next_state)
 				#reward = reward_check(state, next_state)
@@ -451,14 +451,14 @@ if __name__ == '__main__':
 		main()
 	except :
 		print("finish")
-		
+			
 		# Save Graph
 		np.save('./Learning_Data/PG_L_Data', np_PG_data)
 		print "\n<Learning Image Data is saved>"		
-
+		"""
 		# Save model 
 		saver = tf.train.Saver()
 		save_path = saver.save(sess, "./TF_Data/"+learning_model_name)
 		print "\n<Model is saved>"
-		
+		"""
 				

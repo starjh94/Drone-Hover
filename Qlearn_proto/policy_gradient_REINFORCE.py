@@ -257,7 +257,7 @@ def reward_check(degree):
 """
 
 ## *** Fixed *** ##
-def reward_check(degree, target_D = 180):
+def reward_check(degree, target_D = 0):
         if abs(target_D) > 170:
                 if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
                         get_point = True
@@ -485,7 +485,7 @@ def main():
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
 			
-			timer = threading.Timer(60, done_timer).start()
+			timer = threading.Timer(30, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)

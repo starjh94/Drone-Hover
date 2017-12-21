@@ -26,6 +26,7 @@ class REINFORCEAgnet:
             		W1 = tf.get_variable("W1", shape=[self.state_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 			
            		layer1 = tf.nn.tanh(tf.matmul(self._X, W1))
+			#layer1 = tf.nn.relu(tf.matmul(self._X, W1))
 			#layer1 = self.leaky_relu(tf.matmul(self._X, W1))
 			layer1 = tf.nn.dropout(layer1, keep_prob= self.keep_prob) 
 			
@@ -33,6 +34,7 @@ class REINFORCEAgnet:
             		W2 = tf.get_variable("W2", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 
 			layer2 = tf.nn.tanh(tf.matmul(layer1, W2))
+			#layer2 = tf.nn.relu(tf.matmul(layer1, W2))
 			#layer2 = self.leaky_relu(tf.matmul(layer1, W2))
 			layer2 = tf.nn.dropout(layer2, keep_prob= self.keep_prob)
 			
@@ -40,6 +42,7 @@ class REINFORCEAgnet:
             		W3 = tf.get_variable("W3", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 
 			layer3 = tf.nn.tanh(tf.matmul(layer2, W3))
+			#layer3 = tf.nn.relu(tf.matmul(layer2, W3))
 			#layer3 = self.leaky_relu(tf.matmul(layer2, W3))
 			layer3 = tf.nn.dropout(layer3, keep_prob= self.keep_prob)
 			
@@ -47,6 +50,7 @@ class REINFORCEAgnet:
             		W4 = tf.get_variable("W4", shape=[h_size, h_size], initializer=tf.contrib.layers.xavier_initializer())
 	
             		layer4 = tf.nn.tanh(tf.matmul(layer3, W4))
+			#layer4 = tf.nn.relu(tf.matmul(layer3, W4))
 			#layer4 = self.leaky_relu(tf.matmul(layer3, W4))
 			layer4 = tf.nn.dropout(layer4, keep_prob= self.keep_prob)
 			

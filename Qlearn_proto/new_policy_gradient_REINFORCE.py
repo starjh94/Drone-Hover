@@ -258,7 +258,7 @@ def reward_check(degree):
 """
 
 ## *** Fixed *** ##
-def reward_check(degree, target_D = 180):
+def reward_check(degree, target_D = 0):
         if abs(target_D) > 170:
                 if safeBoundary(target_D - 10) < degree[0] or degree[0] < safeBoundary(target_D + 10):
                         get_point = True
