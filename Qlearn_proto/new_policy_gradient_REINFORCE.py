@@ -88,8 +88,8 @@ memory_semaphore = sysv_ipc.Semaphore(128)
 input_size = 4    # (Degree, Angular Velocity, left_motor, right_motor)
 output_size = 9    # { (Motor Up, Keep, Motor Down) * (Motor Up, Keep, Motor Down) }
 
-## for pylab
-np_PG_data = np.array([[0, 0, 0]])
+## for Data
+np_motor_data = np.array([[0, 0, 0]])
 
 def step_action(action, pwm_left, pwm_right, var=0.0005):
 	if action == 0:
@@ -454,8 +454,7 @@ def main():
 	global sess	
 	global model_load
 	global done_episode
-	global np_PG_data
-
+	global np_motor_data
 
 	max_episodes = 2000
 		
@@ -474,7 +473,9 @@ def main():
 			saver = tf.train.Saver()
 			saver.restore(sess, "./TF_Data/"+sys.argv[1]) 	
 			print "'%s' model is loaded" % (sys.argv[1])	
-
+		
+		np_motor_data = np.array([[0, init_pwm_1, init_pwm_2]])		
+		start_time = time.time()
 		for episode in range(max_episodes):
 
 			print "new episodes initializaion"
@@ -485,8 +486,8 @@ def main():
 
 			pwm_left = init_pwm_1
 			pwm_right = init_pwm_2
-			
-			timer = threading.Timer(30, done_timer).start()
+	
+			timer = threading.Timer(60, done_timer).start()
 			print "\n\n"	
 			while not done:				
 				memory_semaphore.acquire(10)
@@ -512,6 +513,9 @@ def main():
 				a.servo_1(pwm_left)
 				a.servo_2(pwm_right)
 				
+				data_time = time.time() - start_time
+				np_motor_data = np.append(np_motor_data, [[data_time, pwm_left, pwm_right]], axis=0)
+
 				time.sleep(0.05)
 				
 				## Get new state and reward from environment
@@ -542,11 +546,13 @@ def main():
 
 				if done:
 					loss = agent.update(keep_prob=0.7)
+					"""
 					if episode == 0:
 						np_PG_data = np.array([[episode, loss, score]])
 					else:	
 	 					np_PG_data = np.append(np_PG_data, [[episode, loss, score]], axis=0)
-                    			score = round(score, 2)
+                    			"""
+					score = round(score, 2)
                     			print "episode: %s  loss: %s  reward: %s  point %s" %(episode, loss ,score, point)
 					time.sleep(3)
 			
@@ -557,8 +563,8 @@ if __name__ == '__main__':
 		print("finish")
 		
 		# Save Graph
-		np.save('./Learning_Data/PG_L_Data', np_PG_data)
-		print "\n<Learning Image Data is saved>"		
+		np.save('motor_Data', np_motor_data)
+		print "\n<Motor Data is saved>"		
 
 		# Save model 
 		saver = tf.train.Saver()

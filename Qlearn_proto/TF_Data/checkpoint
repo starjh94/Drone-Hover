@@ -1,2 +1,2 @@
-model_checkpoint_path: "ksc.ckpt"
-all_model_checkpoint_paths: "ksc.ckpt"
+model_checkpoint_path: "a_v24.ckpt"
+all_model_checkpoint_paths: "a_v24.ckpt"
